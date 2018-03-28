@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">Jasonette</string>
-    <string name="url">https://jasonette.github.io/Jasonpedia/hello.json</string>
+    <string name="url">https://couchdb-cd5da9.smileupps.com/test/test:paytm</string>
     <string name="launch">file://preload.json</string>
 </resources>
