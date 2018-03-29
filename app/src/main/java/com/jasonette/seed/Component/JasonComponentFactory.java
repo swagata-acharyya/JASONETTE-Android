@@ -42,6 +42,8 @@ public class JasonComponentFactory {
                 view = JasonSwitchComponent.build(prototype, component, parent, context);
             } else if(type.equalsIgnoreCase("htmllabel")) {
                 view = JasonHtmllabelComponent.build(prototype, component, parent, context);
+            } else if(type.equalsIgnoreCase("spinner")) {
+                view = JasonSpinnerComponent.build(prototype, component, parent, context);
             } else {
                 // Non-existent component warning
                 JSONObject error_component = new JSONObject(component.toString());
