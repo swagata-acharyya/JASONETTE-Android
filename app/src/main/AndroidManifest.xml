@@ -66,9 +66,9 @@
     <uses-permission android:name="android.permission.VIBRATE"/>
 
     <!-- Uncomment below line to enable $util.addressbook -->
-    <!--
+
         <uses-permission android:name="android.permission.READ_CONTACTS"/>
-    -->
+
 
     <!-- Uncomment below lines to enable $geo.get -->
     <!--
