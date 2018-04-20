@@ -44,6 +44,8 @@ public class JasonComponentFactory {
                 view = JasonHtmllabelComponent.build(prototype, component, parent, context);
             } else if(type.equalsIgnoreCase("spinner")) {
                 view = JasonSpinnerComponent.build(prototype, component, parent, context);
+            } else if(type.equalsIgnoreCase("autocomplete")) {
+                view = JasonAutocompleteComponent.build(prototype, component, parent, context);
             } else {
                 // Non-existent component warning
                 JSONObject error_component = new JSONObject(component.toString());

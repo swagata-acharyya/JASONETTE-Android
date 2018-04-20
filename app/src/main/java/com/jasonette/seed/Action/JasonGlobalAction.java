@@ -10,7 +10,9 @@ import com.jasonette.seed.Launcher.Launcher;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 public class JasonGlobalAction {
     public void reset(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
@@ -97,7 +99,70 @@ public class JasonGlobalAction {
             JasonHelper.next("success", action, ((Launcher)context.getApplicationContext()).getGlobal(), event, context);
 
         } catch (Exception e) {
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+            Log.e("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+        }
+    }
+
+    public void append(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
+
+        /********************
+
+         The following sets a global variable named "db".
+
+         {
+         "type": "$global.set",
+         "options": {
+         "db": ["a", "b", "c", "d"]
+         }
+         }
+
+         Once set, you can access them through template expressions from ANYWHERE within the app, like this:
+
+         {
+         "items": {
+         "{{#each $global.db}}": {
+         "type": "label",
+         "text": "{{this}}"
+         }
+         }
+         }
+
+         ********************/
+
+        try {
+            SharedPreferences pref = context.getSharedPreferences("global", 0);
+            SharedPreferences.Editor editor = pref.edit();
+
+            JSONObject options = action.getJSONObject("options");
+
+            Iterator<String> keysIterator = options.keys();
+            while (keysIterator.hasNext()) {
+                String key = (String) keysIterator.next();
+                try {
+                    Set set = pref.getStringSet(key, new HashSet<String>());
+                    Object val = options.get(key);
+                    set.add(val.toString());
+                    editor.putStringSet(key, set);
+                    ((Launcher) context.getApplicationContext()).setGlobal(key, set);
+                } catch(Exception e) {
+                    String record = pref.getString(key,null);
+                    Object val = options.get(key);
+                    Set set = new HashSet();
+                    if(record!=null) {
+                        set.add(record);
+                    }
+                    set.add(val);
+                    editor.putStringSet(key, set);
+                    ((Launcher) context.getApplicationContext()).setGlobal(key, set);
+                }
+            }
+            editor.commit();
+
+            // Execute next
+            JasonHelper.next("success", action, ((Launcher)context.getApplicationContext()).getGlobal(), event, context);
+
+        } catch (Exception e) {
+            Log.e("Warning1", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
     }
 }

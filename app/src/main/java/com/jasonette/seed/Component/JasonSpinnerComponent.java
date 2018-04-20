@@ -37,7 +37,7 @@ public class JasonSpinnerComponent {
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                         try {
                             ((JasonViewActivity) context).model.var.put(component.getString("name"), spinnerData[position]);
-                        } catch (JSONException e) {
+                            } catch (JSONException e) {
                             Log.e("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
                         }
                     }

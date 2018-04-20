@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import com.github.florent37.singledateandtimepicker.dialog.SingleDateAndTimePick
 import com.jasonette.seed.Core.JasonViewActivity;
 import com.jasonette.seed.Helper.JasonHelper;
 import com.jasonette.seed.Helper.JasonImageHelper;
+import com.jasonette.seed.Launcher.Launcher;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -38,6 +40,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class JasonUtilAction {
     private int counter; // general purpose counter;
@@ -150,6 +157,7 @@ public class JasonUtilAction {
                                                     postObject.put(textField.getTag().toString(),textField.getText().toString());
                                                 }
                                             }
+                                            // You will receive success or error in Jason
                                             JasonHelper.next("success", action, postObject, event, context);
                                         }
                                     } catch (Exception err) {
@@ -351,6 +359,27 @@ public class JasonUtilAction {
         }
     }
 
+    public void loadConfigs(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
+        try {
+            SharedPreferences prefs = context.getSharedPreferences("config_store", MODE_PRIVATE);
+            Map<String,Object> allConfigs = (Map<String, Object>) prefs.getAll();
+            SharedPreferences pref = context.getSharedPreferences("global", 0);
+            SharedPreferences.Editor editor = pref.edit();
+            Set<String> keysIterator = allConfigs.keySet();
+            for(String key : keysIterator) {
+                Object val = allConfigs.get(key);
+                editor.putString(key, val.toString());
+                ((Launcher)context.getApplicationContext()).setGlobal(key, val);
+            }
+            editor.commit();
+
+
+            JasonHelper.next("success", action, ((Launcher)context.getApplicationContext()).getGlobal(), event, context);
+        } catch (Exception e) {
+            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+        }
+    }
+
     public void share(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
         new Thread(new Runnable() {
             @Override
@@ -457,4 +486,7 @@ public class JasonUtilAction {
             }
         }).start();
     }
+
+
+
 }
