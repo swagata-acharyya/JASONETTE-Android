@@ -46,6 +46,8 @@ public class JasonComponentFactory {
                 view = JasonSpinnerComponent.build(prototype, component, parent, context);
             } else if(type.equalsIgnoreCase("autocomplete")) {
                 view = JasonAutocompleteComponent.build(prototype, component, parent, context);
+            } else if(type.equalsIgnoreCase("radio")) {
+                view = JasonRadioComponent.build(prototype, component, parent, context);
             } else {
                 // Non-existent component warning
                 JSONObject error_component = new JSONObject(component.toString());

@@ -156,6 +156,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         if(rootLayout == null) {
             // Create the root layout
             rootLayout = new RelativeLayout(JasonViewActivity.this);
+//            rootLayout.setBackground(getResources().getDrawable(R.drawable.bg_card));
             rootLayout.setLayoutParams(rlp);
             rootLayout.setFitsSystemWindows(true);
         }
@@ -177,6 +178,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             setSupportActionBar(toolbar);
         }
 
+//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         // 4. Create body.sections
 
         // 4.1. RecyclerView
@@ -438,8 +440,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
         // Clear agents
         clear_agents();
-
-
 
         // Store model to shared preference
         SharedPreferences pref = getSharedPreferences("model", 0);
@@ -1721,12 +1721,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             if(model.jason != null && model.jason.has("$jason") && model.jason.getJSONObject("$jason").has("head") && model.jason.getJSONObject("$jason").getJSONObject("head").has("offline")){
                 SharedPreferences pref = getSharedPreferences("offline", 0);
                 SharedPreferences.Editor editor = pref.edit();
-
                 String signature = model.url + model.params.toString();
                 JSONObject offline_cache = new JSONObject();
                 offline_cache.put("jason", model.jason);
                 offline_cache.put("rendered", model.rendered);
-
                 editor.putString(signature, offline_cache.toString());
                 editor.commit();
 
