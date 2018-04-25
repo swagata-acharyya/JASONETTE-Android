@@ -19,6 +19,8 @@ import com.jasonette.seed.Component.JasonComponentFactory;
 import com.jasonette.seed.Component.JasonImageComponent;
 import com.jasonette.seed.Helper.JasonHelper;
 import com.jasonette.seed.Core.JasonViewActivity;
+import com.jasonette.seed.R;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -497,7 +499,9 @@ public class ItemAdapter extends RecyclerView.Adapter <ItemAdapter.ViewHolder>{
 
                     // background
                     if (style.has("background")) {
+
                         if(level == 0) {
+
                             // top level. allow image background
                             String background = style.getString("background");
                             if (background.matches("(file|http[s]?):\\/\\/.*")) {
@@ -518,7 +522,11 @@ public class ItemAdapter extends RecyclerView.Adapter <ItemAdapter.ViewHolder>{
                                 layout.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
                             }
                         } else {
-                            layout.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+                            if(style.getString("background").equalsIgnoreCase("card")) {
+                                layout.setBackground(context.getResources().getDrawable(R.drawable.bg_card));
+                            } else {
+                                layout.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+                            }
                         }
                     }
 
