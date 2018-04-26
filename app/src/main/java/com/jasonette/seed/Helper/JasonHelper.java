@@ -14,12 +14,14 @@ import android.widget.TextView;
 import com.jasonette.seed.Core.JasonViewActivity;
 import com.jasonette.seed.Launcher.Launcher;
 
+import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -277,12 +279,16 @@ public class JasonHelper {
         String jr = null;
         Object ret;
         try {
-            InputStream is = context.getAssets().open(filename);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            jr = new String(buffer, "UTF-8");
+            if (fn.startsWith("file://")) {
+                InputStream is = context.getAssets().open(filename);
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                jr = new String(buffer, "UTF-8");
+            } else {
+                jr = FileUtils.readFileToString(new File(filename));
+            }
 
 
             if(jr.trim().startsWith("[")) {
