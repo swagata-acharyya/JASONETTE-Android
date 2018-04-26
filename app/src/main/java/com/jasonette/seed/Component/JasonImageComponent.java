@@ -18,13 +18,14 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.jasonette.seed.Helper.JasonHelper;
+
 import org.json.JSONObject;
 
+import java.io.File;
 import java.net.URI;
 import java.util.Iterator;
 
@@ -77,9 +78,11 @@ public class JasonImageComponent {
                 return "file:///android_asset/file/" + url.substring(7);
             } else if(url.startsWith("data:image")) {
                 return url;
-            } else {
+            } else if (url.startsWith("http")) {
                 LazyHeaders.Builder builder = JasonImageComponent.prepare(component, context);
                 return new GlideUrl(url, builder.build());
+            } else {
+                return context.getFilesDir() + File.separator + url;
             }
         } catch (Exception e){
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
