@@ -287,7 +287,7 @@ public class JasonHelper {
                 is.close();
                 jr = new String(buffer, "UTF-8");
             } else {
-                jr = FileUtils.readFileToString(new File(filename));
+                jr = FileUtils.readFileToString(new File(context.getFilesDir() + File.separator + filename));
             }
 
 
