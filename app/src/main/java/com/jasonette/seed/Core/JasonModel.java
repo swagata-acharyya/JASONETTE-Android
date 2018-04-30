@@ -105,8 +105,29 @@ public class JasonModel{
     public void fetch() {
         if(url.startsWith("file://")) {
             fetch_local(url);
-        } else {
+        } else if (url.startsWith("http")) {
             fetch_http(url);
+        } else {
+            fetch_from_cloudant_db(url);
+        }
+    }
+
+    public void fetch_from_cloudant_db(final String url) {
+        final JasonViewActivity context = this.view;
+        try {
+            Runnable r = new Runnable() {
+                @Override
+                public void run() {
+                    jason = (JSONObject) JasonHelper.read_json(url, context);
+                    refs = new JSONObject();
+                    resolve_and_build(jason.toString());
+                }
+            };
+            Thread t = new Thread(r);
+            t.start();
+
+        } catch (Exception e) {
+            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
     }
 

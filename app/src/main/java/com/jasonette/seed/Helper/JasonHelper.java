@@ -11,6 +11,7 @@ import android.util.TypedValue;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.jasonette.seed.Cloudant.DocumentStoreHelper;
 import com.jasonette.seed.Core.JasonViewActivity;
 import com.jasonette.seed.Launcher.Launcher;
 
@@ -277,13 +278,17 @@ public class JasonHelper {
         String jr = null;
         Object ret;
         try {
-            InputStream is = context.getAssets().open(filename);
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
-            jr = new String(buffer, "UTF-8");
-
+            if (fn.startsWith("file://")) {
+                InputStream is = context.getAssets().open(filename);
+                int size = is.available();
+                byte[] buffer = new byte[size];
+                is.read(buffer);
+                is.close();
+                jr = new String(buffer, "UTF-8");
+            } else {
+                String dbName = filename.split(":")[0];
+                jr = DocumentStoreHelper.getDoc(dbName, filename, context);
+            }
 
             if(jr.trim().startsWith("[")) {
                 // array

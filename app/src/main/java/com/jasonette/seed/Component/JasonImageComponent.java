@@ -18,11 +18,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.jasonette.seed.Helper.JasonHelper;
+
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -119,7 +119,11 @@ public class JasonImageComponent {
     }
     private static void normal(JSONObject component, final View view, Context context) {
         Object new_url = JasonImageComponent.resolve_url(component, context);
-        if(new_url.getClass().toString().equalsIgnoreCase("string") && ((String)new_url).startsWith("data:image")){
+        Log.d("IMAGE", "URL: " + new_url);
+        Log.d("IMAGE", "new_url instanceof String: " + (new_url instanceof String));
+        Log.d("IMAGE", "((String)new_url).startsWith(data:image): " + ((String)new_url).startsWith("data:image"));
+        Log.d("IMAGE", "((String)new_url).startsWith(data:image/jpeg;base64,): " + ((String)new_url).startsWith("data:image/jpeg;base64,"));
+        if(new_url instanceof String && ((String)new_url).startsWith("data:image")){
             String n = (String)new_url;
             String base64;
             if(n.startsWith("data:image/jpeg")){
@@ -132,6 +136,7 @@ public class JasonImageComponent {
                 base64 = "";    // exception
             }
             byte[] bs = Base64.decode(base64, Base64.NO_WRAP);
+            Log.d("IMAGE", "base64: " + base64);
 
             Glide.with(context).load(bs)
                     .into(new SimpleTarget<GlideDrawable>() {
