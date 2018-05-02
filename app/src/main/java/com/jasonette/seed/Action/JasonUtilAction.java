@@ -366,11 +366,24 @@ public class JasonUtilAction {
             SharedPreferences pref = context.getSharedPreferences("global", 0);
             SharedPreferences.Editor editor = pref.edit();
             Set<String> keysIterator = allConfigs.keySet();
+            String advertisements = "";
             for(String key : keysIterator) {
+                Log.d("IMAGESLIDER","Checking Key is " + key);
                 Object val = allConfigs.get(key);
-                editor.putString(key, val.toString());
-                ((Launcher)context.getApplicationContext()).setGlobal(key, val);
+                if(!key.startsWith("advert")) {
+                    editor.putString(key, val.toString());
+                    ((Launcher) context.getApplicationContext()).setGlobal(key, val);
+                } else {
+                    Log.d("IMAGESLIDER","Key is " + key + " and val = " + val);
+
+//                    if(advertForToday(((String)val).split(":::")[0])) {
+                        advertisements+=("~~"+((((String)val).split(":::")[2])+":::"+((String)val).split(":::")[3]));
+//                    }
+                }
             }
+            editor.putString("advert", advertisements);
+            Log.d("IMAGESLIDER","Setting global as " + advertisements);
+            ((Launcher) context.getApplicationContext()).setGlobal("advert", advertisements);
             editor.commit();
 
 
@@ -378,6 +391,10 @@ public class JasonUtilAction {
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
+    }
+
+    private boolean advertForToday(String date) {
+        return true;
     }
 
     public void share(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {

@@ -191,7 +191,6 @@ public class JasonModel{
     }
 
 
-
     private void include(String res){
         String regex =  "\"([+@])\"[ ]*:[ ]*\"(([^\"@]+)(@))?([^\"]+)\"";
         Pattern require_pattern = Pattern.compile(regex);
