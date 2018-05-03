@@ -278,18 +278,12 @@ public class JasonHelper {
         String jr = null;
         Object ret;
         try {
-            if (fn.startsWith("file://")) {
-                InputStream is = context.getAssets().open(filename);
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
-                jr = new String(buffer, "UTF-8");
-            } else {
-                // Assumes docId starts with DB name. Eg., icdx:subscriber:login, where icdx is DB name
-                String dbName = filename.split(":")[0];
-                jr = DocumentStoreHelper.getDoc(dbName, filename, context);
-            }
+            InputStream is = context.getAssets().open(filename);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            jr = new String(buffer, "UTF-8");
 
             if(jr.trim().startsWith("[")) {
                 // array
