@@ -11,6 +11,7 @@ import android.util.TypedValue;
 import android.view.WindowManager;
 import android.widget.TextView;
 
+import com.jasonette.seed.Cloudant.DocumentStoreHelper;
 import com.jasonette.seed.Core.JasonViewActivity;
 import com.jasonette.seed.Launcher.Launcher;
 
@@ -284,7 +285,6 @@ public class JasonHelper {
             is.close();
             jr = new String(buffer, "UTF-8");
 
-
             if(jr.trim().startsWith("[")) {
                 // array
                 ret = new JSONArray(jr);
@@ -301,6 +301,28 @@ public class JasonHelper {
         }
         return ret;
 
+    }
+
+    public static Object read_json_from_cloudant(String fn, Context context) {
+        String jr = null;
+        Object ret;
+        try {
+            // Assumes docId starts with DB name. Eg., icdx:subscriber:login, where "icdx" is DB name
+            String dbName = fn.split(":")[0];
+            jr = DocumentStoreHelper.getDoc(dbName, fn, context);
+
+            if (jr.trim().startsWith("[")) {
+                ret = new JSONArray(jr);
+            } else if (jr.trim().startsWith("{")) {
+                ret = new JSONObject(jr);
+            } else {
+                ret = jr;
+            }
+        } catch (Exception e) {
+            Timber.w(e);
+            return new JSONObject();
+        }
+        return ret;
     }
 
     public static void permission_exception(String actionName, Context context) {
