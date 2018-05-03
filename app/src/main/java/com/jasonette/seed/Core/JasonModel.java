@@ -118,14 +118,13 @@ public class JasonModel{
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
-                    jason = (JSONObject) JasonHelper.read_json(url, context);
+                    jason = (JSONObject) JasonHelper.read_json_from_cloudant(url, context);
                     refs = new JSONObject();
                     resolve_and_build(jason.toString());
                 }
             };
             Thread t = new Thread(r);
             t.start();
-
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }

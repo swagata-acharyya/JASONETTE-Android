@@ -119,10 +119,6 @@ public class JasonImageComponent {
     }
     private static void normal(JSONObject component, final View view, Context context) {
         Object new_url = JasonImageComponent.resolve_url(component, context);
-        Log.d("IMAGE", "URL: " + new_url);
-        Log.d("IMAGE", "new_url instanceof String: " + (new_url instanceof String));
-        Log.d("IMAGE", "((String)new_url).startsWith(data:image): " + ((String)new_url).startsWith("data:image"));
-        Log.d("IMAGE", "((String)new_url).startsWith(data:image/jpeg;base64,): " + ((String)new_url).startsWith("data:image/jpeg;base64,"));
         if(new_url instanceof String && ((String)new_url).startsWith("data:image")){
             String n = (String)new_url;
             String base64;
@@ -136,7 +132,6 @@ public class JasonImageComponent {
                 base64 = "";    // exception
             }
             byte[] bs = Base64.decode(base64, Base64.NO_WRAP);
-            Log.d("IMAGE", "base64: " + base64);
 
             Glide.with(context).load(bs)
                     .into(new SimpleTarget<GlideDrawable>() {
