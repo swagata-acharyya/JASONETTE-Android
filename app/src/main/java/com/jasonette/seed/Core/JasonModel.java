@@ -108,11 +108,11 @@ public class JasonModel{
         } else if (url.startsWith("http")) {
             fetch_http(url);
         } else {
-            fetch_from_cloudant_db(url);
+            fetchFromLocalStorage(url);
         }
     }
 
-    public void fetch_from_cloudant_db(final String url) {
+    private void fetchFromLocalStorage(final String url) {
         final JasonViewActivity context = this.view;
         try {
             Runnable r = new Runnable() {
@@ -126,7 +126,7 @@ public class JasonModel{
             Thread t = new Thread(r);
             t.start();
         } catch (Exception e) {
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+            Log.e("Error", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
     }
 
