@@ -23,6 +23,7 @@ import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.jasonette.seed.Helper.JasonHelper;
+
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -116,7 +117,7 @@ public class JasonImageComponent {
     }
     private static void normal(JSONObject component, final View view, Context context) {
         Object new_url = JasonImageComponent.resolve_url(component, context);
-        if(new_url.getClass().toString().equalsIgnoreCase("string") && ((String)new_url).startsWith("data:image")){
+        if(new_url instanceof String && ((String)new_url).startsWith("data:image")){
             String n = (String)new_url;
             String base64;
             if(n.startsWith("data:image/jpeg")){
