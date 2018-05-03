@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -17,10 +19,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.jasonette.seed.Helper.JasonHelper;
 
 import org.json.JSONObject;
@@ -90,20 +91,17 @@ public class JasonImageComponent {
     private static void gif(JSONObject component, View view, Context context){
         Object new_url = JasonImageComponent.resolve_url(component, context);
         Glide
-            .with(context)
+            .with(context).asGif()
             .load(new_url)
-            .asGif()
-            .diskCacheStrategy(DiskCacheStrategy.SOURCE)
             .into((ImageView)view);
     }
     private static void rounded(JSONObject component, View view, final float corner_radius_float, final Context context){
         Object new_url = JasonImageComponent.resolve_url(component, context);
         try {
             Glide
-                .with(context)
+                .with(context).asBitmap()
                 .load(new_url)
-                .asBitmap()
-                .fitCenter()
+
                 .into(new BitmapImageViewTarget((ImageView)view) {
                     @Override
                     protected void setResource(Bitmap res) {
@@ -134,12 +132,13 @@ public class JasonImageComponent {
             byte[] bs = Base64.decode(base64, Base64.NO_WRAP);
 
             Glide.with(context).load(bs)
-                    .into(new SimpleTarget<GlideDrawable>() {
-                @Override
-                public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                    ((ImageView)view).setImageDrawable(resource);
-                }
-            });
+                    .into(new SimpleTarget<Drawable>() {
+
+                        @Override
+                        public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                            ((ImageView)view).setImageDrawable(resource);
+                        }
+                    });
         } else {
             Glide
                     .with(context)
@@ -153,10 +152,8 @@ public class JasonImageComponent {
             Object new_url = JasonImageComponent.resolve_url(component, context);
             final JSONObject style = component.getJSONObject("style");
             Glide
-                .with(context)
+                .with(context).asBitmap()
                 .load(new_url)
-                .asBitmap()
-                .fitCenter()
                 .into(new BitmapImageViewTarget((ImageView)view) {
                     @Override
                     protected void setResource(Bitmap res) {

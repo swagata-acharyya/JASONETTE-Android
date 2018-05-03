@@ -5,13 +5,15 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 
 import org.json.JSONObject;
 
@@ -101,12 +103,13 @@ public class JasonImageHelper {
                 int height = 384;
 
                 Glide
-                        .with(context)
+                        .with(context).asBitmap()
                         .load(url)
-                        .asBitmap()
+
                         .into(new SimpleTarget<Bitmap>(width, height) {
+
                             @Override
-                            public void onResourceReady(Bitmap bitmap, GlideAnimation anim) {
+                            public void onResourceReady(@NonNull Bitmap bitmap, @Nullable Transition<? super Bitmap> transition) {
                                 Uri bitmapUri = null;
                                 try {
                                     File file =  new File(context.getExternalFilesDir(Environment.DIRECTORY_PICTURES), "share_image_" + System.currentTimeMillis() + ".png");

@@ -1,6 +1,9 @@
 package com.jasonette.seed.Section;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -12,9 +15,8 @@ import android.widget.LinearLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.jasonette.seed.Component.JasonComponentFactory;
 import com.jasonette.seed.Component.JasonImageComponent;
 import com.jasonette.seed.Helper.JasonHelper;
@@ -399,13 +401,14 @@ public class ItemAdapter extends RecyclerView.Adapter <ItemAdapter.ViewHolder>{
 
         }
 
-        class BackgroundImage extends SimpleTarget<GlideDrawable> {
+        class BackgroundImage extends SimpleTarget<Drawable> {
             LinearLayout layout;
             public BackgroundImage(LinearLayout layout) {
                 this.layout = layout;
             }
+
             @Override
-            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
                 this.layout.setBackground(resource);
             }
         }
@@ -507,15 +510,14 @@ public class ItemAdapter extends RecyclerView.Adapter <ItemAdapter.ViewHolder>{
                             if (background.matches("(file|http[s]?):\\/\\/.*")) {
                                 JSONObject c = new JSONObject();
                                 c.put("url", background);
-                                DiskCacheStrategy cacheStrategy = DiskCacheStrategy.RESULT;
+                                DiskCacheStrategy cacheStrategy = DiskCacheStrategy.AUTOMATIC;
                                 // gif doesn't work with RESULT cache strategy
                                 // TODO: Check with Glide V4
                                 if (background.matches(".*\\.gif")) {
-                                    cacheStrategy = DiskCacheStrategy.SOURCE;
+                                    cacheStrategy = DiskCacheStrategy.AUTOMATIC;
                                 }
                                 Glide.with(root_context)
                                         .load(JasonImageComponent.resolve_url(c, root_context))
-                                        .diskCacheStrategy(cacheStrategy)
                                         .into(new BackgroundImage(layout));
                             } else {
                                 // plain background

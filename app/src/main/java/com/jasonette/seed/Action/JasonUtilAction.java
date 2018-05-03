@@ -33,6 +33,9 @@ import com.jasonette.seed.Helper.JasonHelper;
 import com.jasonette.seed.Helper.JasonImageHelper;
 import com.jasonette.seed.Launcher.Launcher;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -366,18 +369,37 @@ public class JasonUtilAction {
             SharedPreferences pref = context.getSharedPreferences("global", 0);
             SharedPreferences.Editor editor = pref.edit();
             Set<String> keysIterator = allConfigs.keySet();
+            String advertisements = "";
             for(String key : keysIterator) {
                 Object val = allConfigs.get(key);
-                editor.putString(key, val.toString());
-                ((Launcher)context.getApplicationContext()).setGlobal(key, val);
+                if(!key.startsWith("advert")) {
+                    editor.putString(key, val.toString());
+                    ((Launcher) context.getApplicationContext()).setGlobal(key, val);
+                } else if(advertForToday(((String)val).split(":::")[0],((String)val).split(":::")[1])) {
+                        advertisements+=("~~"+((((String)val).split(":::")[2])+":::"+((String)val).split(":::")[3]));
+                    }
             }
+            editor.putString("advert", advertisements);
+            Log.d("IMAGESLIDER","Setting global as " + advertisements);
+            ((Launcher) context.getApplicationContext()).setGlobal("advert", advertisements);
             editor.commit();
-
-
             JasonHelper.next("success", action, ((Launcher)context.getApplicationContext()).getGlobal(), event, context);
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
+    }
+
+    private boolean advertForToday(String startDate, String endDate) {
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("YYYY-MM-dd");
+        DateTime start = DateTime.parse(startDate, fmt);
+        Log.d("DATECHECK","StartDate " + start);
+        DateTime end = DateTime.parse(endDate, fmt);
+        Log.d("DATECHECK","end Date " + end);
+        DateTime today = new DateTime();
+        Log.d("DATECHECK","Current Date " + today);
+        Log.d("DATECHECK","Result " + (today.isAfter(start) && today.isBefore(end)));
+        return today.isAfter(start) && today.isBefore(end);
+//        return true;
     }
 
     public void share(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
