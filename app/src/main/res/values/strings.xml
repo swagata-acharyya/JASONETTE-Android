@@ -2,7 +2,7 @@
     <string name="app_name">Jasonette</string>
     <!--<string name="url">https://couchdb-cd5da9.smileupps.com/test/test:home</string>-->
     <!--<string name="url">https://c162ffb1-a906-47bc-adf7-25dc8bce9884-bluemix.cloudant.com/experiments/expt:homescreen</string>-->
-    <string name="url">https://c162ffb1-a906-47bc-adf7-25dc8bce9884-bluemix.cloudant.com/experiments/expt:begin</string>
+    <string name="url">https://c162ffb1-a906-47bc-adf7-25dc8bce9884-bluemix.cloudant.com/nbk/nbk:screen:language</string>
     <!--<string name="url">https://jasonbase.com/things/Gx6q.json</string>-->
     <!--<string name="url">https://jasonbase.com/things/KzgZ.json</string>-->
     <string name="launch">file://preload.json</string>

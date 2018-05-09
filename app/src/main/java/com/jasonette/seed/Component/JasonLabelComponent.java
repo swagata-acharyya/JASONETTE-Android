@@ -61,6 +61,50 @@ public class JasonLabelComponent {
                     ((TextView)view).setTextSize(Float.parseFloat(style.getString("size")));
                 }
 
+                /*******
+                 * Padding: By default padding is 15
+                 ******/
+                // override each padding value only if it's not specified
+
+                int padding_top = -1;
+                int padding_left = -1;
+                int padding_bottom = -1;
+                int padding_right = -1;
+                if(style.has("padding")){
+                    padding_top = (int)JasonHelper.pixels(context, style.getString("padding_top"), "horizontal");
+                    padding_left = padding_top;
+                    padding_right = padding_top;
+                    padding_bottom = padding_top;
+                }
+                if(style.has("padding_top")){
+                    padding_top = (int)JasonHelper.pixels(context, style.getString("padding_top"), "vertical");
+                }
+                if(style.has("padding_left")){
+                    padding_left = (int)JasonHelper.pixels(context, style.getString("padding_left"), "horizontal");
+                }
+                if(style.has("padding_bottom")){
+                    padding_bottom = (int)JasonHelper.pixels(context, style.getString("padding_bottom"), "vertical");
+                }
+                if(style.has("padding_right")){
+                    padding_right = (int)JasonHelper.pixels(context, style.getString("padding_right"), "horizontal");
+                }
+
+                // if not specified, default is 15
+                if(padding_top < 0){
+                    padding_top = 10;
+                }
+                if(padding_left < 0){
+                    padding_left = 10;
+                }
+                if(padding_bottom < 0){
+                    padding_bottom = 10;
+                }
+                if(padding_right < 0){
+                    padding_right = 10;
+                }
+
+                view.setPadding(padding_left, padding_top, padding_right, padding_bottom);
+
                 ((TextView)view).setHorizontallyScrolling(false);
 
                 JasonComponent.addListener(view, context);

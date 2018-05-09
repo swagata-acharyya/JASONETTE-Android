@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.InputType;
+import android.text.Selection;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.method.PasswordTransformationMethod;
@@ -102,6 +104,9 @@ public class JasonTextfieldComponent {
                 // default value
                 if(component.has("value")){
                     ((EditText)view).setText(component.getString("value"));
+                    if(component.has("default_editable")) {
+                        Selection.setSelection(((EditText)view).getText(), ((EditText)view).getText().length());
+                    }
                 }
 
                 // keyboard
@@ -121,9 +126,18 @@ public class JasonTextfieldComponent {
                         ((EditText) view).setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
                     }
                 }
-
+                final EditText finalView = (EditText) view;
+                if (component.has("length_check") && component.getString("length_check").equalsIgnoreCase("strict")) {
+                    int length = Integer.parseInt(component.getString("length"));
+                    String defTxt = component.optString("value");
+                    length = length + defTxt.length();
+                    InputFilter[] filterArray = new InputFilter[1];
+                    filterArray[0] = new InputFilter.LengthFilter(length);
+                    finalView.setFilters(filterArray);
+                }
                 // Data binding
                 if(component.has("name")){
+
                     ((EditText)view).addTextChangedListener(new TextWatcher() {
                         @Override
                         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -138,6 +152,12 @@ public class JasonTextfieldComponent {
                         @Override
                         public void afterTextChanged(Editable s) {
                             try {
+                            if(component.has("default_editable") && !s.toString().startsWith(component.getString("value"))){
+                                ((EditText) finalView).setText(component.getString("value"));
+                                Selection.setSelection(((EditText) finalView).getText(), ((EditText) finalView).getText().length());
+
+                            }
+
                                 ((JasonViewActivity) context).model.var.put(component.getString("name"), s.toString());
                                 if(component.has("on")){
                                     JSONObject events = component.getJSONObject("on");
@@ -153,7 +173,7 @@ public class JasonTextfieldComponent {
                         }
                     });
                 }
-                ((EditText)view).setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                ((EditText)finalView).setOnEditorActionListener(new TextView.OnEditorActionListener() {
                     @Override
                     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                         if (actionId == EditorInfo.IME_ACTION_DONE) {
@@ -172,7 +192,7 @@ public class JasonTextfieldComponent {
 
                 // The order is important => Must set the secure mode first and then set the font because Android sets the typeface to monospace by default when password mode
                 if(style.has("secure")){
-                    ((EditText)view).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+//                    ((EditText)view).setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
                     ((EditText)view).setTransformationMethod(PasswordTransformationMethod.getInstance());
                 }
                 if (style.has("font:android")){
