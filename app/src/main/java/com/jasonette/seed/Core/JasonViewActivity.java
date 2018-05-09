@@ -2104,8 +2104,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
     private void setup_header(JSONObject header) {
         try {
-            String backgroundColor = header.getJSONObject("style").getString("background");
-            toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
+
             String logo = header.optString("logo");
             if (logo != null || !logo.isEmpty()) {
                 Resources resources = getApplicationContext().getResources();
@@ -2115,6 +2114,33 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 if (image != null) {
                     image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
                     toolbar.setLogo(image);
+                }
+            }
+
+            if (header.has("class")) {
+               JSONObject style = JasonHelper.style(header,this);
+               if(style.has("background")) {
+                   toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+               }
+
+               if(style.has("padding")) {
+                   int padding = Integer.parseInt(style.getString("padding"));
+                   toolbar.setPadding(padding,padding,padding,padding);
+               }
+
+                if(style.has("color")) {
+                    toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
+                }
+
+                if(style.has("font") || style.has("font:android")) {
+                    toolbar.setTitleFont(style);
+                }
+            }
+
+            if(header.optJSONObject("style")!=null) {
+                String backgroundColor = header.optJSONObject("style").optString("background");
+                if(backgroundColor!=null && !backgroundColor.isEmpty()) {
+                    toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
                 }
             }
         } catch (Exception e) {

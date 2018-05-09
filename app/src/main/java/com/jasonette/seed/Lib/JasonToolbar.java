@@ -147,4 +147,16 @@ public class JasonToolbar extends Toolbar {
     public void setImageWidth(int width) {
         imageWidth = width;
     }
+
+    @Override
+    public void setBackgroundColor(int color) {
+        super.setBackgroundColor(color);
+    }
+
+    @Override
+    public void setTextAlignment(int textAlignment) {
+        super.setTextAlignment(textAlignment);
+    }
+
+
 }
