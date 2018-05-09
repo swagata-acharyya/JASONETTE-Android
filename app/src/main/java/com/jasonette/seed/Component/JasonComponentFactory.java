@@ -50,7 +50,7 @@ public class JasonComponentFactory {
                 view = JasonRadioComponent.build(prototype, component, parent, context);
             } else if(type.equalsIgnoreCase("imageslider")) {
                 view = JasonImageSliderComponent.build(prototype, component, parent, context);
-            } else {
+            }  else {
                 // Non-existent component warning
                 JSONObject error_component = new JSONObject(component.toString());
                 error_component.put("type", "label");
@@ -63,9 +63,7 @@ public class JasonComponentFactory {
             if (component.has("focus")) {
                 ((JasonViewActivity)context).focusView = view;
             }
-
             return view;
-
         }
         catch (Exception e){
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());

@@ -2,6 +2,7 @@ package com.jasonette.seed.Lib;
 
 import android.content.Context;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
@@ -103,6 +104,11 @@ public class JasonToolbar extends Toolbar {
         Glide.with(getContext())
                 .load(JasonImageComponent.resolve_url(url, getContext()))
                 .into(logoView);
+    }
+
+    @Override
+    public void setLogo(Drawable drawable) {
+        super.setLogo(drawable);
     }
 
     public void setTitleFont(JSONObject style) {

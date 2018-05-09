@@ -8,8 +8,10 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -21,6 +23,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -2103,6 +2106,17 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         try {
             String backgroundColor = header.getJSONObject("style").getString("background");
             toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
+            String logo = header.optString("logo");
+            if (logo != null || !logo.isEmpty()) {
+                Resources resources = getApplicationContext().getResources();
+                final int resourceId = resources.getIdentifier(logo, "drawable",
+                        getApplicationContext().getPackageName());
+                Drawable image = resources.getDrawable(resourceId);
+                if (image != null) {
+                    image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
+                    toolbar.setLogo(image);
+                }
+            }
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }

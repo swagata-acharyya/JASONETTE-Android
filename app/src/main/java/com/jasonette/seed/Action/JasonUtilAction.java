@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import android.support.v7.app.AlertDialog;
 import android.text.InputType;
 import android.text.format.DateFormat;
 import android.util.Base64;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
@@ -44,6 +46,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -72,6 +75,29 @@ public class JasonUtilAction {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
     }
+
+    public void setLocale(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONObject options = action.getJSONObject("options");
+                    String locale = options.getString("locale");
+                    Resources res = context.getResources();
+// Change locale settings in the app.
+                    DisplayMetrics dm = res.getDisplayMetrics();
+                    android.content.res.Configuration conf = res.getConfiguration();
+                    conf.setLocale(new Locale(locale.toLowerCase())); // API 17+ only.
+// Use conf.locale = new Locale(...) if targeting lower versions
+                    res.updateConfiguration(conf, dm);
+                    JasonHelper.next("success", action, new JSONObject(), event, context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
     public void toast(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override

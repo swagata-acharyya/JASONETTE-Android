@@ -61,6 +61,7 @@ public class JasonImageSliderComponent {
                 requestOptions
                         .centerCrop();
                 Log.d("IMAGESLIDER","URL size " + listUrl.size());
+                ((SliderLayout)view).removeAllSliders();
                 for (int i = 0; i < listUrl.size(); i++) {
                     DefaultSliderView sliderView = new DefaultSliderView(context);
                     sliderView
