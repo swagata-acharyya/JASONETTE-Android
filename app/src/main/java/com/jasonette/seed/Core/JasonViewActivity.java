@@ -2118,29 +2118,30 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             }
 
             if (header.has("class")) {
-               JSONObject style = JasonHelper.style(header,this);
-               if(style.has("background")) {
-                   toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
-               }
+                JSONObject style = JasonHelper.style(header, this);
+                if (style.has("background")) {
+                    toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+                }
 
-               if(style.has("padding")) {
-                   int padding = Integer.parseInt(style.getString("padding"));
-                   toolbar.setPadding(padding,padding,padding,padding);
-               }
+                if (style.has("padding")) {
+                    int padding = Integer.parseInt(style.getString("padding"));
+                    toolbar.setPadding(padding, padding, padding, padding);
+                }
 
-                if(style.has("color")) {
+                if (style.has("color")) {
                     toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
                 }
 
-                if(style.has("font") || style.has("font:android")) {
+                if (style.has("font") || style.has("font:android")) {
                     toolbar.setTitleFont(style);
                 }
-            }
-
-            if(header.optJSONObject("style")!=null) {
+            } else if (header.optJSONObject("style") != null) {
                 String backgroundColor = header.optJSONObject("style").optString("background");
-                if(backgroundColor!=null && !backgroundColor.isEmpty()) {
+                if (backgroundColor != null && !backgroundColor.isEmpty()) {
                     toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
+                }
+                if (header.optJSONObject("style").has("color")) {
+                    toolbar.setTitleTextColor(JasonHelper.parse_color(header.optJSONObject("style").getString("color")));
                 }
             }
         } catch (Exception e) {
