@@ -97,6 +97,17 @@ public class JasonUtilAction {
             }
         });
     }
+    
+     public void readData(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
+                try {
+                    JSONObject options = action.getJSONObject("options");
+                    String docId = options.getString("doc_id");
+                    JSONObject obj = (JSONObject)JasonHelper.read_json_from_cloudant(docId,context);
+                    JasonHelper.next("success", action, obj, event, context);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+    }
 
     public void toast(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -118,6 +129,7 @@ public class JasonUtilAction {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
     }
+
     public void alert(final JSONObject action, final JSONObject data, final JSONObject event, final Context context){
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -166,11 +178,7 @@ public class JasonUtilAction {
                                     lManager.showSoftInput(focousedTextField, 0);
                                 }
                             });
-
-
                         }
-
-
                     }
                     builder.setPositiveButton("OK",
                             new DialogInterface.OnClickListener() {
