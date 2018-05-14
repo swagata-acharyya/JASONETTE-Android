@@ -256,6 +256,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
         if (intent.hasExtra("url")) {
             url = intent.getStringExtra("url");
+
         } else {
             url = getString(R.string.url);
         }
