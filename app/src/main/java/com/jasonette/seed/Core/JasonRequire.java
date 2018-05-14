@@ -40,8 +40,10 @@ public class JasonRequire implements Runnable{
     public void run() {
         if(this.URL.contains("file://")) {
             local();
-        } else {
+        } else if (this.URL.startsWith("http")) {
             remote();
+        } else {
+            cloudant();
         }
     }
     private void local(){
@@ -52,6 +54,30 @@ public class JasonRequire implements Runnable{
                 public void run()
                 {
                     Object json = JasonHelper.read_json(URL, context);
+                    try {
+                        private_refs.put(URL, json);
+                    } catch (Exception e) {
+                        Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+                    }
+                    latch.countDown();
+                }
+            };
+            Thread t = new Thread(r);
+            t.start();
+        } catch (Exception e) {
+            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+            latch.countDown();
+        }
+    }
+
+    private void cloudant(){
+        try {
+            Runnable r = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    Object json = JasonHelper.read_json_from_cloudant(URL, context);
                     try {
                         private_refs.put(URL, json);
                     } catch (Exception e) {
