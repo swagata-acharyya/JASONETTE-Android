@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.jasonette.seed.Helper.JasonHelper;
+import com.jasonette.seed.Launcher.Launcher;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,10 +17,10 @@ import java.net.URI;
 import java.util.Iterator;
 import java.util.concurrent.CountDownLatch;
 
-import okhttp3.Request;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import okhttp3.Response;
 
 public class JasonRequire implements Runnable{
@@ -77,7 +78,16 @@ public class JasonRequire implements Runnable{
                 @Override
                 public void run()
                 {
-                    Object json = JasonHelper.read_json_from_cloudant(URL, context);
+                    String id = URL;
+                    if (URL.startsWith("#global")) {
+                        id = URL.split("\\.")[1];
+                        try {
+                            id = ((Launcher) context.getApplicationContext()).getGlobal().getString(id);
+                        } catch (JSONException e) {
+                            Log.e("GLOBAL-Cloudant", "Error while fetching value from global", e);
+                        }
+                    }
+                    Object json = JasonHelper.read_json_from_cloudant(id, context);
                     try {
                         private_refs.put(URL, json);
                     } catch (Exception e) {
