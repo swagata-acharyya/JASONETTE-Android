@@ -8,6 +8,8 @@ import com.cloudant.sync.documentstore.DocumentStore;
 import com.cloudant.sync.documentstore.DocumentStoreException;
 import com.cloudant.sync.documentstore.DocumentStoreNotOpenedException;
 
+import java.util.List;
+
 public class DocumentStoreHelper {
 
     /**
@@ -24,6 +26,20 @@ public class DocumentStoreHelper {
         DocumentStore documentStore = getDocumentStore(dbName, context);
         DocumentRevision documentRevision = documentStore.database().read(id);
         return documentRevision.getBody().toString();
+    }
+
+    /**
+     * Retrieves all documents from database
+     *
+     * @param dbName  name of database
+     * @param context {@link Context} object
+     * @return {@link List<DocumentRevision>}s
+     * @throws DocumentStoreException
+     */
+    public static List<DocumentRevision> getAllDocs(String dbName, Context context) throws DocumentStoreException {
+        DocumentStore db = getDocumentStore(dbName, context);
+        int nDocs = db.database().getDocumentCount();
+        return db.database().read(0, nDocs, true);
     }
 
     private static DocumentStore getDocumentStore(String dbName, Context context) throws DocumentStoreNotOpenedException {
