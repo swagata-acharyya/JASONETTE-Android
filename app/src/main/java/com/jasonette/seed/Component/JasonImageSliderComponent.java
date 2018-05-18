@@ -5,75 +5,72 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.AppCompatTextView;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.request.RequestOptions;
+import com.cloudant.sync.documentstore.DocumentRevision;
 import com.glide.slider.library.Animations.DescriptionAnimation;
 import com.glide.slider.library.SliderLayout;
 import com.glide.slider.library.SliderTypes.BaseSliderView;
 import com.glide.slider.library.SliderTypes.DefaultSliderView;
-import com.glide.slider.library.SliderTypes.TextSliderView;
-import com.jasonette.seed.Core.JasonViewActivity;
-import com.jasonette.seed.Helper.JasonHelper;
+import com.jasonette.seed.Cloudant.DocumentStoreHelper;
 
-import org.json.JSONArray;
-import org.json.JSONException;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class JasonImageSliderComponent {
     public static View build(View view, final JSONObject component, final JSONObject parent, final Context context) {
         if (view == null) {
             return new SliderLayout(context);
         } else {
-            ArrayList<String> listUrl = new ArrayList<>();
-            ArrayList<String> listName = new ArrayList<>();
+            List<String> imageUrls = new ArrayList<>();
+            List<String> actionUrls = new ArrayList<>();
 
             try {
                 JasonComponent.build(view, component, parent, context);
-                String data = component.getString("data").substring(2);
-                Log.d("IMAGESLIDER","Received data as " + data);
-                String[] ads = data.split("~~");
-                Log.d("IMAGESLIDER","ads are " + ads.length);
-                listUrl.clear();
-                listName.clear();
-                if(ads.length!=0) {
-                    for (String ad : ads) {
-                        Log.d("IMAGESLIDER","ad is " + ad);
-                        String url = ad.split(":::")[0];
-                        String action = ad.split(":::")[1];
-                        listUrl.add(url);
-                        listName.add(action);
+
+                List<DocumentRevision> revs = DocumentStoreHelper.getAllDocs(component.getString("client_id"), context);
+                for (DocumentRevision rev : revs) {
+                    Map<String, Object> docBody = rev.getBody().asMap();
+                    if (docBody.containsKey("doc_type") && ((String) docBody.get("doc_type")).equalsIgnoreCase("advertisement")) {
+                        if (((String) docBody.get("is_active")).equalsIgnoreCase("true")) {
+                            String startDate = (String) docBody.get("start_date");
+                            String endDate = (String) docBody.get("end_date");
+                            if (advertForToday(startDate, endDate)) {
+                                Map<String, String> urls = (Map<String, String>) docBody.get("advert");
+                                String imageUrl = urls.get("image_url");
+                                String actionUrl = urls.get("action_url");
+                                imageUrls.add(imageUrl);
+                                actionUrls.add(actionUrl);
+                            }
+                        }
                     }
-                } else {
-                    String defaultAd = component.getString("default_ad");
                 }
 
                 RequestOptions requestOptions = new RequestOptions();
-                requestOptions
-                        .centerCrop();
-                Log.d("IMAGESLIDER","URL size " + listUrl.size());
+                requestOptions.centerCrop();
+                Log.d("IMAGESLIDER","URL size " + imageUrls.size());
                 ((SliderLayout)view).removeAllSliders();
-                for (int i = 0; i < listUrl.size(); i++) {
+                for (int i = 0; i < imageUrls.size(); i++) {
                     DefaultSliderView sliderView = new DefaultSliderView(context);
                     sliderView
-                            .image(listUrl.get(i))
-                            .description(listName.get(i))
+                            .image(imageUrls.get(i))
+                            .description(actionUrls.get(i))
                             .setRequestOption(requestOptions)
                             .setBackgroundColor(Color.WHITE)
                             .setProgressBarVisible(true);
 
                     //add your extra information
                     sliderView.bundle(new Bundle());
-                    sliderView.getBundle().putString("extra", listName.get(i));
+                    sliderView.getBundle().putString("extra", actionUrls.get(i));
                     ((SliderLayout) view).addSlider(sliderView);
                     sliderView.setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
                         @Override
@@ -97,6 +94,17 @@ public class JasonImageSliderComponent {
                 return null;
             }
         }
+    }
 
+    private static boolean advertForToday(String startDate, String endDate) {
+        DateTimeFormatter fmt = DateTimeFormat.forPattern("YYYY-MM-dd");
+        DateTime start = DateTime.parse(startDate, fmt);
+        Log.d("DATECHECK", "StartDate " + start);
+        DateTime end = DateTime.parse(endDate, fmt);
+        Log.d("DATECHECK", "end Date " + end);
+        DateTime today = new DateTime();
+        Log.d("DATECHECK", "Current Date " + today);
+        Log.d("DATECHECK", "Result " + (today.isAfter(start) && today.isBefore(end)));
+        return today.isAfter(start) && today.isBefore(end);
     }
 }
