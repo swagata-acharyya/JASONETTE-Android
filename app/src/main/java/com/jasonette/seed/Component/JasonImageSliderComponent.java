@@ -16,6 +16,7 @@ import com.glide.slider.library.SliderLayout;
 import com.glide.slider.library.SliderTypes.BaseSliderView;
 import com.glide.slider.library.SliderTypes.DefaultSliderView;
 import com.jasonette.seed.Cloudant.DocumentStoreHelper;
+import com.jasonette.seed.utils.AppUtil;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -37,7 +38,7 @@ public class JasonImageSliderComponent {
             try {
                 JasonComponent.build(view, component, parent, context);
 
-                List<DocumentRevision> revs = DocumentStoreHelper.getAllDocs(component.getString("client_id"), context);
+                List<DocumentRevision> revs = DocumentStoreHelper.getAllDocs(AppUtil.getConfigValue(AppUtil.KEY_DOCS_DB, context), context);
                 for (DocumentRevision rev : revs) {
                     Map<String, Object> docBody = rev.getBody().asMap();
                     if (docBody.containsKey("doc_type") && ((String) docBody.get("doc_type")).equalsIgnoreCase("advertisement")) {

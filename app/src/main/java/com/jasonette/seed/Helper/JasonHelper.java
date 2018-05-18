@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.jasonette.seed.Cloudant.DocumentStoreHelper;
 import com.jasonette.seed.Core.JasonViewActivity;
 import com.jasonette.seed.Launcher.Launcher;
+import com.jasonette.seed.utils.AppUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -307,9 +308,8 @@ public class JasonHelper {
         String jr = null;
         Object ret;
         try {
-            // Assumes docId starts with DB name. Eg., icdx:subscriber:login, where "icdx" is DB name
             String dbName = fn.split(":")[0];
-            jr = DocumentStoreHelper.getDoc(dbName, fn, context);
+            jr = DocumentStoreHelper.getDoc(AppUtil.getConfigValue(AppUtil.KEY_DOCS_DB, context), fn, context);
 
             if (jr.trim().startsWith("[")) {
                 ret = new JSONArray(jr);
