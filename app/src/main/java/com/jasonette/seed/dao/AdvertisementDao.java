@@ -29,6 +29,10 @@ public class AdvertisementDao extends CloudantBaseDao {
         super(dbName, context);
     }
 
+    /**
+     * @return docs having "doc_type" as advertisement and are active
+     * @throws QueryException
+     */
     public Map<String, List<String>> getAdverts() throws QueryException {
         Map<String, List<String>> keyValuesMap = new HashMap<>();
         Query query = documentStore.query();

@@ -60,6 +60,7 @@ public class DocumentStoreHelper {
             documentStore = documentStoreMap.get(dbName);
         } else {
             documentStore = DocumentStore.getInstance(context.getDir(dbName, Context.MODE_PRIVATE));
+            documentStoreMap.put(dbName, documentStore);
         }
         return documentStore;
     }
