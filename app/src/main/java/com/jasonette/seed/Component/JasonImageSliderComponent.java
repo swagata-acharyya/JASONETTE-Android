@@ -10,16 +10,13 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.bumptech.glide.request.RequestOptions;
-import com.cloudant.sync.documentstore.DocumentRevision;
 import com.glide.slider.library.Animations.DescriptionAnimation;
 import com.glide.slider.library.SliderLayout;
 import com.glide.slider.library.SliderTypes.BaseSliderView;
 import com.glide.slider.library.SliderTypes.DefaultSliderView;
-import com.jasonette.seed.Cloudant.DocumentStoreHelper;
+import com.jasonette.seed.dao.AdvertisementDao;
+import com.jasonette.seed.utils.AppUtil;
 
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -27,6 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 public class JasonImageSliderComponent {
+
+    public static String IMAGE_URLS = "image_urls";
+    public static String ACTION_URLS = "action_urls";
+
     public static View build(View view, final JSONObject component, final JSONObject parent, final Context context) {
         if (view == null) {
             return new SliderLayout(context);
@@ -37,28 +38,16 @@ public class JasonImageSliderComponent {
             try {
                 JasonComponent.build(view, component, parent, context);
 
-                List<DocumentRevision> revs = DocumentStoreHelper.getAllDocs(component.getString("client_id"), context);
-                for (DocumentRevision rev : revs) {
-                    Map<String, Object> docBody = rev.getBody().asMap();
-                    if (docBody.containsKey("doc_type") && ((String) docBody.get("doc_type")).equalsIgnoreCase("advertisement")) {
-                        if (((String) docBody.get("is_active")).equalsIgnoreCase("true")) {
-                            String startDate = (String) docBody.get("start_date");
-                            String endDate = (String) docBody.get("end_date");
-                            if (advertForToday(startDate, endDate)) {
-                                Map<String, String> urls = (Map<String, String>) docBody.get("advert");
-                                String imageUrl = urls.get("image_url");
-                                String actionUrl = urls.get("action_url");
-                                imageUrls.add(imageUrl);
-                                actionUrls.add(actionUrl);
-                            }
-                        }
-                    }
-                }
+                AdvertisementDao advertisementDao = new AdvertisementDao(AppUtil.getConfigValue(AppUtil.KEY_DOCS_DB, context), context);
+                Map<String, List<String>> urlsMap = advertisementDao.getAdverts();
+
+                imageUrls = urlsMap.get(IMAGE_URLS);
+                actionUrls = urlsMap.get(ACTION_URLS);
 
                 RequestOptions requestOptions = new RequestOptions();
                 requestOptions.centerCrop();
-                Log.d("IMAGESLIDER","URL size " + imageUrls.size());
-                ((SliderLayout)view).removeAllSliders();
+                Log.d("IMAGESLIDER", "URL size " + imageUrls.size());
+                ((SliderLayout) view).removeAllSliders();
                 for (int i = 0; i < imageUrls.size(); i++) {
                     DefaultSliderView sliderView = new DefaultSliderView(context);
                     sliderView
@@ -75,7 +64,7 @@ public class JasonImageSliderComponent {
                     sliderView.setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
                         @Override
                         public void onSliderClick(BaseSliderView baseSliderView) {
-                            Toast.makeText(context,"Clicked on " + baseSliderView.getDescription(),Toast.LENGTH_LONG).show();
+                            Toast.makeText(context, "Clicked on " + baseSliderView.getDescription(), Toast.LENGTH_LONG).show();
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(baseSliderView.getDescription()));
                             context.startActivity(browserIntent);
                         }
@@ -89,22 +78,10 @@ public class JasonImageSliderComponent {
                 ((SliderLayout) view).setDuration(4000);
                 view.requestLayout();
                 return view;
-            }catch (Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
         }
-    }
-
-    private static boolean advertForToday(String startDate, String endDate) {
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("YYYY-MM-dd");
-        DateTime start = DateTime.parse(startDate, fmt);
-        Log.d("DATECHECK", "StartDate " + start);
-        DateTime end = DateTime.parse(endDate, fmt);
-        Log.d("DATECHECK", "end Date " + end);
-        DateTime today = new DateTime();
-        Log.d("DATECHECK", "Current Date " + today);
-        Log.d("DATECHECK", "Result " + (today.isAfter(start) && today.isBefore(end)));
-        return today.isAfter(start) && today.isBefore(end);
     }
 }

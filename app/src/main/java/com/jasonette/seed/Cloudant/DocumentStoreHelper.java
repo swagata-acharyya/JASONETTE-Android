@@ -8,9 +8,13 @@ import com.cloudant.sync.documentstore.DocumentStore;
 import com.cloudant.sync.documentstore.DocumentStoreException;
 import com.cloudant.sync.documentstore.DocumentStoreNotOpenedException;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DocumentStoreHelper {
+
+    private static Map<String, DocumentStore> documentStoreMap = new HashMap<>();
 
     /**
      * Retrieves document from database
@@ -42,7 +46,22 @@ public class DocumentStoreHelper {
         return db.database().read(0, nDocs, true);
     }
 
-    private static DocumentStore getDocumentStore(String dbName, Context context) throws DocumentStoreNotOpenedException {
-        return DocumentStore.getInstance(context.getDir(dbName, Context.MODE_PRIVATE));
+    /**
+     * Gives cached instance of {@link DocumentStore} if exists, otherwise returns a new instance
+     *
+     * @param dbName  name of the DB
+     * @param context {@link Context} object
+     * @return {@link DocumentStore} instance for the given DB
+     * @throws DocumentStoreNotOpenedException
+     */
+    public static DocumentStore getDocumentStore(String dbName, Context context) throws DocumentStoreNotOpenedException {
+        DocumentStore documentStore;
+        if (documentStoreMap.containsKey(dbName)) {
+            documentStore = documentStoreMap.get(dbName);
+        } else {
+            documentStore = DocumentStore.getInstance(context.getDir(dbName, Context.MODE_PRIVATE));
+            documentStoreMap.put(dbName, documentStore);
+        }
+        return documentStore;
     }
 }
