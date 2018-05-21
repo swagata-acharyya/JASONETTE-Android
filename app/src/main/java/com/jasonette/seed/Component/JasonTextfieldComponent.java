@@ -2,6 +2,7 @@ package com.jasonette.seed.Component;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
@@ -128,11 +129,12 @@ public class JasonTextfieldComponent {
                 }
                 final EditText finalView = (EditText) view;
                 if (component.has("length_check") && component.getString("length_check").equalsIgnoreCase("strict")) {
-                    int length = Integer.parseInt(component.getString("length"));
+                    String length = component.optString("length");
+                    int len = length.isEmpty()?0:Integer.parseInt(length);
                     String defTxt = component.optString("value");
-                    length = length + defTxt.length();
+                    len = len + defTxt.length();
                     InputFilter[] filterArray = new InputFilter[1];
-                    filterArray[0] = new InputFilter.LengthFilter(length);
+                    filterArray[0] = new InputFilter.LengthFilter(len);
                     finalView.setFilters(filterArray);
                 }
                 // Data binding
