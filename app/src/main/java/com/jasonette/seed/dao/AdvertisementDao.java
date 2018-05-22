@@ -44,37 +44,56 @@ public class AdvertisementDao extends CloudantBaseDao {
         List<String> imageUrls = new ArrayList<>();
         List<String> actionUrls = new ArrayList<>();
 
+        List<String> defaultImageUrls = new ArrayList<>();
+        List<String> defaultActionUrls = new ArrayList<>();
+
         if (null != queryResult && queryResult.iterator().hasNext()) {
             for (DocumentRevision rev : queryResult) {
                 Map<String, Object> docBody = rev.getBody().asMap();
                 if (((String) docBody.get("is_active")).equalsIgnoreCase("true")) {
-                    String startDate = (String) docBody.get("start_date");
-                    String endDate = (String) docBody.get("end_date");
-                    if (advertForToday(startDate, endDate)) {
+
+                    if (advertForToday(docBody)) {
                         Map<String, String> urls = (Map<String, String>) docBody.get("advert");
                         String imageUrl = urls.get("image_url");
                         String actionUrl = urls.get("action_url");
-                        imageUrls.add(imageUrl);
-                        actionUrls.add(actionUrl);
+                        if (docBody.get("default") == null) {
+                            imageUrls.add(imageUrl);
+                            actionUrls.add(actionUrl);
+                        } else {
+                            defaultImageUrls.add(imageUrl);
+                            defaultActionUrls.add(actionUrl);
+                        }
                     }
                 }
             }
 
-            keyValuesMap.put(IMAGE_URLS, imageUrls);
-            keyValuesMap.put(ACTION_URLS, actionUrls);
+            if(!imageUrls.isEmpty()) {
+                keyValuesMap.put(IMAGE_URLS, imageUrls);
+                keyValuesMap.put(ACTION_URLS, actionUrls);
+            } else {
+                keyValuesMap.put(IMAGE_URLS, defaultImageUrls);
+                keyValuesMap.put(ACTION_URLS, defaultActionUrls);
+            }
         }
         return keyValuesMap;
     }
 
-    private static boolean advertForToday(String startDate, String endDate) {
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("YYYY-MM-dd");
-        DateTime start = DateTime.parse(startDate, fmt);
-        Log.d("DATECHECK", "StartDate " + start);
-        DateTime end = DateTime.parse(endDate, fmt);
-        Log.d("DATECHECK", "end Date " + end);
-        DateTime today = new DateTime();
-        Log.d("DATECHECK", "Current Date " + today);
-        Log.d("DATECHECK", "Result " + (today.isAfter(start) && today.isBefore(end)));
-        return today.isAfter(start) && today.isBefore(end);
+    private static boolean advertForToday(Map<String, Object> docBody) {
+        Log.d("DOCBODY","Docbody is " + docBody);
+        if(docBody.containsKey("default")) {
+            return true;
+        } else {
+            String startDate = (String) docBody.get("start_date");
+            String endDate = (String) docBody.get("end_date");
+            DateTimeFormatter fmt = DateTimeFormat.forPattern("YYYY-MM-dd");
+            DateTime start = DateTime.parse(startDate, fmt);
+            Log.d("DATECHECK", "StartDate " + start);
+            DateTime end = DateTime.parse(endDate, fmt);
+            Log.d("DATECHECK", "end Date " + end);
+            DateTime today = new DateTime();
+            Log.d("DATECHECK", "Current Date " + today);
+            Log.d("DATECHECK", "Result " + (today.isAfter(start) && today.isBefore(end)));
+            return today.isAfter(start) && today.isBefore(end);
+        }
     }
 }
