@@ -64,7 +64,6 @@ public class JasonImageSliderComponent {
                     sliderView.setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
                         @Override
                         public void onSliderClick(BaseSliderView baseSliderView) {
-                            Toast.makeText(context, "Clicked on " + baseSliderView.getDescription(), Toast.LENGTH_LONG).show();
                             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(baseSliderView.getDescription()));
                             context.startActivity(browserIntent);
                         }

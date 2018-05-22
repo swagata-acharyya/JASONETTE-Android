@@ -157,10 +157,10 @@ public class JasonTextfieldComponent {
                             if(component.has("default_editable") && !s.toString().startsWith(component.getString("value"))){
                                 ((EditText) finalView).setText(component.getString("value"));
                                 Selection.setSelection(((EditText) finalView).getText(), ((EditText) finalView).getText().length());
-
-                            }
-
+                                ((JasonViewActivity) context).model.var.put(component.getString("name"), s.toString().substring(component.optString("value").length()));
+                            } else {
                                 ((JasonViewActivity) context).model.var.put(component.getString("name"), s.toString());
+                            }
                                 if(component.has("on")){
                                     JSONObject events = component.getJSONObject("on");
                                     if(events.has("change")){
