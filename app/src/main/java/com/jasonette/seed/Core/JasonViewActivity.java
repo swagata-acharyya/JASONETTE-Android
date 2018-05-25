@@ -199,15 +199,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         // Set layout manager to position the items
         listView.setLayoutManager(new LinearLayoutManager(this));
 
-        if (null == tabLayout) {
-            LinearLayout.LayoutParams tabLayoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            tabLayout = new TabLayout(this);
-            tabLayout.setTabMode(TabLayout.MODE_FIXED);
-            tabLayout.setLayoutParams(tabLayoutParams);
-        }
-
         // 4.2. LinearLayout
         if (sectionLayout == null) {
             // Create LinearLayout
@@ -218,11 +209,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
             // Add toolbar to LinearLayout
             if (toolbar != null) sectionLayout.addView(toolbar);
-
-            if (null != tabLayout) {
-                sectionLayout.addView(tabLayout);
-                tabLayout.setVisibility(View.GONE);
-            }
 
             // Add RecyclerView to LinearLayout
             if (listView != null) sectionLayout.addView(listView);
@@ -1473,6 +1459,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 isexecuting = false;
                 resumed = false;
                 String url = action.getJSONObject("options").getString("url");
+                Log.d("URL", "Opening URL: " + url);
                 String transition = "push";
                 if (action.getJSONObject("options").has("transition")) {
                     transition = action.getJSONObject("options").getString("transition");
@@ -2003,15 +1990,19 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                         }
                     });
 
+                    boolean isTabLayout = false;
+
                     // Set header
                     if (body.has("header")) {
-                        setup_header(body.getJSONObject("header"));
+                        JSONObject header = body.getJSONObject("header");
+                        isTabLayout = header.has("tabs");
+                        setup_header(header);
                         toolbar.setVisibility(View.VISIBLE);
                     } else {
                         toolbar.setVisibility(View.GONE);
                     }
                     // Set sections
-                    if (body.has("sections")) {
+                    if (!isTabLayout && body.has("sections")) {
                         setup_sections(body.getJSONArray("sections"));
                         String border = "#eaeaea"; // Default color
 
@@ -2357,7 +2348,16 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private void setupTabLayout(JSONObject tabs) {
         try {
             final JSONArray items = tabs.getJSONArray("items");
-            tabLayout.setVisibility(View.VISIBLE);
+
+            if (null == tabLayout) {
+                RelativeLayout.LayoutParams tabLayoutParams = new RelativeLayout.LayoutParams(
+                        RelativeLayout.LayoutParams.MATCH_PARENT,
+                        RelativeLayout.LayoutParams.WRAP_CONTENT);
+                tabLayout = new TabLayout(this);
+                tabLayout.setTabMode(TabLayout.MODE_FIXED);
+                tabLayout.setLayoutParams(tabLayoutParams);
+                rootLayout.addView(tabLayout);
+            }
 
             JSONObject style;
             int selectedTabColor = JasonHelper.parse_color("#FFFFFF");
