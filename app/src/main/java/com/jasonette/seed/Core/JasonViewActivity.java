@@ -24,6 +24,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -77,6 +78,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -103,6 +106,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private ImageView logoView;
     private ArrayList<JSONObject> section_items;
     private HashMap<Integer, AHBottomNavigationItem> bottomNavigationItems;
+    private Map<Integer, TabLayout.Tab> tabItems;
+    private int tabRenderedCount = 0;
     public HashMap<String, Object> modules;
     private SwipeRefreshLayout swipeLayout;
     public LinearLayout sectionLayout;
@@ -2359,6 +2364,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 rootLayout.addView(tabLayout);
             }
 
+            if (null == tabItems) {
+                tabItems = new TreeMap<>();
+            }
+
             JSONObject style;
             int selectedTabColor = JasonHelper.parse_color("#FFFFFF");
             int disabledTabColor = JasonHelper.parse_color("#C0C0C0");
@@ -2381,10 +2390,14 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 }
             }
 
-            for (int i = 0; i < items.length(); i++) {
-                final JSONObject item = items.getJSONObject(i);
-                if (item.has("image")) {
+            final int selectedColor = selectedTabColor;
+            final int disabledColor = disabledTabColor;
 
+            for (int i = 0; i < items.length(); i++) {
+                tabRenderedCount = 0;
+                final JSONObject item = items.getJSONObject(i);
+                final int position = item.has("position") ? Integer.parseInt(item.getString("position")) : 0;
+                if (item.has("image")) {
                     String tempText = "";
                     try {
                         if (item.has("text")) {
@@ -2406,7 +2419,19 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                     Drawable drawable = new BitmapDrawable(getResources(), resource);
-                                    tabLayout.addTab(tabLayout.newTab().setText(text).setIcon(drawable));
+                                    int color = (position == 1) ? selectedColor : disabledColor;
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                        drawable.setTint(color);
+                                    } else {
+                                        DrawableCompat.setTint(DrawableCompat.wrap(drawable), color);
+                                    }
+                                    tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
+                                    tabRenderedCount++;
+                                    if (items.length() == tabRenderedCount) {
+                                        for (Integer pos : tabItems.keySet()) {
+                                            tabLayout.addTab(tabItems.get(pos));
+                                        }
+                                    }
                                 }
                             });
                 } else if (item.has("text")) {
@@ -2417,17 +2442,15 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                         Log.e("TABS", "Error while getting text", e);
                     }
                     ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
-                    tabLayout.addTab(tabLayout.newTab().setText(text).setIcon(drawable));
+                    tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
+                    tabRenderedCount++;
+                    if (items.length() == tabRenderedCount) {
+                        for (Integer pos : tabItems.keySet()) {
+                            tabLayout.addTab(tabItems.get(pos));
+                        }
+                    }
                 }
             }
-
-            for (int tabIndex = 0; tabIndex < tabLayout.getTabCount(); tabIndex++) {
-                TextView tabTextView = (TextView) (((LinearLayout) ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(tabIndex)).getChildAt(1));
-                tabTextView.setAllCaps(false);
-            }
-
-            final int selectedColor = selectedTabColor;
-            final int disabledColor = disabledTabColor;
 
             tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 
