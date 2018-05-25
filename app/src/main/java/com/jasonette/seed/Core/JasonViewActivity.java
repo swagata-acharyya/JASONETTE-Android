@@ -21,9 +21,9 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -39,7 +39,6 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
@@ -47,6 +46,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
 import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
@@ -58,12 +58,12 @@ import com.jasonette.seed.Component.JasonComponentFactory;
 import com.jasonette.seed.Component.JasonImageComponent;
 import com.jasonette.seed.Helper.JasonHelper;
 import com.jasonette.seed.Launcher.Launcher;
-import com.jasonette.seed.Service.agent.JasonAgentService;
-import com.jasonette.seed.Service.vision.JasonVisionService;
 import com.jasonette.seed.Lib.JasonToolbar;
 import com.jasonette.seed.Lib.MaterialBadgeTextView;
 import com.jasonette.seed.R;
 import com.jasonette.seed.Section.ItemAdapter;
+import com.jasonette.seed.Service.agent.JasonAgentService;
+import com.jasonette.seed.Service.vision.JasonVisionService;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import org.json.JSONArray;
@@ -129,6 +129,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     JSONObject intent_to_resolve;
     public JSONObject agents = new JSONObject();
     private boolean isexecuting = false;
+    private TabLayout tabLayout;
 
     /*************************************************************
      *
@@ -198,6 +199,15 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         // Set layout manager to position the items
         listView.setLayoutManager(new LinearLayoutManager(this));
 
+        if (null == tabLayout) {
+            LinearLayout.LayoutParams tabLayoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            tabLayout = new TabLayout(this);
+            tabLayout.setTabMode(TabLayout.MODE_FIXED);
+            tabLayout.setLayoutParams(tabLayoutParams);
+        }
+
         // 4.2. LinearLayout
         if (sectionLayout == null) {
             // Create LinearLayout
@@ -208,6 +218,11 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
             // Add toolbar to LinearLayout
             if (toolbar != null) sectionLayout.addView(toolbar);
+
+            if (null != tabLayout) {
+                sectionLayout.addView(tabLayout);
+                tabLayout.setVisibility(View.GONE);
+            }
 
             // Add RecyclerView to LinearLayout
             if (listView != null) sectionLayout.addView(listView);
@@ -2104,58 +2119,65 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
 
     private void setup_header(JSONObject header) {
-        try {
+        if (header.has("tabs")) {
+            try {
+                setupTabLayout(header.getJSONObject("tabs"));
+            } catch (JSONException e) {
+                Log.e("TABS", "Error while adding tab layout", e);
+            }
+        } else {
+            try {
 
-            String logo = header.optString("logo");
-            if (logo != null || !logo.isEmpty()) {
-                Resources resources = getApplicationContext().getResources();
-                final int resourceId = resources.getIdentifier(logo, "drawable",
-                        getApplicationContext().getPackageName());
-                Drawable image = resources.getDrawable(resourceId);
-                if (image != null) {
-                    image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
-                    toolbar.setLogo(image);
+                String logo = header.optString("logo");
+                if (logo != null || !logo.isEmpty()) {
+                    Resources resources = getApplicationContext().getResources();
+                    final int resourceId = resources.getIdentifier(logo, "drawable",
+                            getApplicationContext().getPackageName());
+                    Drawable image = resources.getDrawable(resourceId);
+                    if (image != null) {
+                        image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
+                        toolbar.setLogo(image);
+                    }
                 }
+
+                if (header.has("class")) {
+                    JSONObject style = JasonHelper.style(header, this);
+                    if (style.has("background")) {
+                        toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+                    }
+
+                    if (style.has("padding")) {
+                        int padding = Integer.parseInt(style.getString("padding"));
+                        toolbar.setPadding(padding, padding, padding, padding);
+                    }
+
+                    if (style.has("color")) {
+                        toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
+                    }
+
+                    if (style.has("font") || style.has("font:android")) {
+                        toolbar.setTitleFont(style);
+                    }
+                } else if (header.optJSONObject("style") != null) {
+                    String backgroundColor = header.optJSONObject("style").optString("background");
+                    if (backgroundColor != null && !backgroundColor.isEmpty()) {
+                        toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
+                    }
+                    if (header.optJSONObject("style").has("color")) {
+                        toolbar.setTitleTextColor(JasonHelper.parse_color(header.optJSONObject("style").getString("color")));
+                    }
+                }
+            } catch (Exception e) {
+                Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
             }
 
-            if (header.has("class")) {
-                JSONObject style = JasonHelper.style(header, this);
-                if (style.has("background")) {
-                    toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
-                }
-
-                if (style.has("padding")) {
-                    int padding = Integer.parseInt(style.getString("padding"));
-                    toolbar.setPadding(padding, padding, padding, padding);
-                }
-
-                if (style.has("color")) {
-                    toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
-                }
-
-                if (style.has("font") || style.has("font:android")) {
-                    toolbar.setTitleFont(style);
-                }
-            } else if (header.optJSONObject("style") != null) {
-                String backgroundColor = header.optJSONObject("style").optString("background");
-                if (backgroundColor != null && !backgroundColor.isEmpty()) {
-                    toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
-                }
-                if (header.optJSONObject("style").has("color")) {
-                    toolbar.setTitleTextColor(JasonHelper.parse_color(header.optJSONObject("style").getString("color")));
-                }
+            try {
+                String color = header.getJSONObject("style").getString("color");
+                toolbar.setTitleTextColor(JasonHelper.parse_color(color));
+            } catch (Exception e) {
+                Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
             }
-        } catch (Exception e) {
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
-
-        try {
-            String color = header.getJSONObject("style").getString("color");
-            toolbar.setTitleTextColor(JasonHelper.parse_color(color));
-        } catch (Exception e) {
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
-        }
-
     }
 
 
@@ -2327,6 +2349,125 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
             listView.setClipToPadding(false);
             listView.setPadding(0, 0, 0, height);
+        } catch (Exception e) {
+            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+        }
+    }
+
+    private void setupTabLayout(JSONObject tabs) {
+        try {
+            final JSONArray items = tabs.getJSONArray("items");
+            tabLayout.setVisibility(View.VISIBLE);
+
+            JSONObject style;
+            int selectedTabColor = JasonHelper.parse_color("#FFFFFF");
+            int disabledTabColor = JasonHelper.parse_color("#C0C0C0");
+
+            if (tabs.has("style")) {
+                style = tabs.getJSONObject("style");
+
+                if (style.has("color")) {
+                    selectedTabColor = JasonHelper.parse_color(style.getString("color"));
+                }
+
+                if (style.has("color:disabled")) {
+                    disabledTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
+                }
+                tabLayout.setTabTextColors(disabledTabColor, selectedTabColor);
+
+                if (style.has("background")) {
+                    int background = JasonHelper.parse_color(style.getString("background"));
+                    tabLayout.setBackgroundColor(background);
+                }
+            }
+
+            for (int i = 0; i < items.length(); i++) {
+                final JSONObject item = items.getJSONObject(i);
+                if (item.has("image")) {
+
+                    String tempText = "";
+                    try {
+                        if (item.has("text")) {
+                            tempText = item.getString("text");
+                        }
+                    } catch (Exception e) {
+                        Log.e("TABS", "Error while getting text", e);
+                    }
+                    final String text = tempText;
+
+                    JSONObject c = new JSONObject();
+                    c.put("url", item.getString("image"));
+                    Glide
+                            .with(this).asBitmap()
+                            .load(JasonImageComponent.resolve_url(c, JasonViewActivity.this))
+
+                            .into(new SimpleTarget<Bitmap>(100, 100) {
+
+                                @Override
+                                public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                    Drawable drawable = new BitmapDrawable(getResources(), resource);
+                                    tabLayout.addTab(tabLayout.newTab().setText(text).setIcon(drawable));
+                                }
+                            });
+                } else if (item.has("text")) {
+                    String text = "";
+                    try {
+                        text = item.getString("text");
+                    } catch (Exception e) {
+                        Log.e("TABS", "Error while getting text", e);
+                    }
+                    ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
+                    tabLayout.addTab(tabLayout.newTab().setText(text).setIcon(drawable));
+                }
+            }
+
+            for (int tabIndex = 0; tabIndex < tabLayout.getTabCount(); tabIndex++) {
+                TextView tabTextView = (TextView) (((LinearLayout) ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(tabIndex)).getChildAt(1));
+                tabTextView.setAllCaps(false);
+            }
+
+            final int selectedColor = selectedTabColor;
+            final int disabledColor = disabledTabColor;
+
+            tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+
+                @Override
+                public void onTabSelected(TabLayout.Tab tab) {
+                    tab.getIcon().setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
+                    try {
+                        JSONObject item = items.getJSONObject(tab.getPosition());
+                        if (item.has("url")) {
+                            String url = item.getString("url");
+                            JSONObject action = new JSONObject();
+                            JSONObject options = new JSONObject();
+                            options.put("url", url);
+                            options.put("transition", "switchtab");
+                            action.put("options", options);
+                            href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
+                        }
+                    } catch (Exception e) {
+                        Log.e("TABS", "Error while performing action on tab select", e);
+                    }
+                }
+
+                @Override
+                public void onTabUnselected(TabLayout.Tab tab) {
+                    tab.getIcon().setColorFilter(disabledColor, PorterDuff.Mode.SRC_IN);
+                }
+
+                @Override
+                public void onTabReselected(TabLayout.Tab tab) {
+                    // Do nothing
+                }
+            });
+
+            for (int tabIndex = 0; tabIndex < tabLayout.getTabCount(); tabIndex++) {
+                TextView tabTextView = (TextView) (((LinearLayout) ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(tabIndex)).getChildAt(1));
+                tabTextView.setAllCaps(false);
+            }
+
+            listView.setClipToPadding(false);
+            listView.setPadding(0, 160, 0, 0);
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
