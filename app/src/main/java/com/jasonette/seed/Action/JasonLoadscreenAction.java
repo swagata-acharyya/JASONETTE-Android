@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.design.widget.Snackbar;
 import android.util.Log;
 
 import com.jasonette.seed.Core.JasonViewActivity;
@@ -15,7 +14,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 public class JasonLoadscreenAction {
     public void load(final JSONObject action, final JSONObject data, final JSONObject event, final Context context) {

@@ -1995,19 +1995,26 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                         }
                     });
 
-                    boolean isTabLayout = false;
-
                     // Set header
                     if (body.has("header")) {
                         JSONObject header = body.getJSONObject("header");
-                        isTabLayout = header.has("tabs");
                         setup_header(header);
                         toolbar.setVisibility(View.VISIBLE);
                     } else {
                         toolbar.setVisibility(View.GONE);
                     }
+
+                    boolean isTabLayout = body.has("tabs");
+                    if (isTabLayout) {
+                        try {
+                            setupTabLayout(body.getJSONObject("tabs"));
+                        } catch (JSONException e) {
+                            Log.e("TABS", "Error while adding tab layout", e);
+                        }
+                    }
+
                     // Set sections
-                    if (!isTabLayout && body.has("sections")) {
+                    if (body.has("sections")) {
                         setup_sections(body.getJSONArray("sections"));
                         String border = "#eaeaea"; // Default color
 
@@ -2115,65 +2122,58 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
 
     private void setup_header(JSONObject header) {
-        if (header.has("tabs")) {
-            try {
-                setupTabLayout(header.getJSONObject("tabs"));
-            } catch (JSONException e) {
-                Log.e("TABS", "Error while adding tab layout", e);
-            }
-        } else {
-            try {
+        try {
 
-                String logo = header.optString("logo");
-                if (logo != null || !logo.isEmpty()) {
-                    Resources resources = getApplicationContext().getResources();
-                    final int resourceId = resources.getIdentifier(logo, "drawable",
-                            getApplicationContext().getPackageName());
-                    Drawable image = resources.getDrawable(resourceId);
-                    if (image != null) {
-                        image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
-                        toolbar.setLogo(image);
-                    }
+            String logo = header.optString("logo");
+            if (logo != null || !logo.isEmpty()) {
+                Resources resources = getApplicationContext().getResources();
+                final int resourceId = resources.getIdentifier(logo, "drawable",
+                        getApplicationContext().getPackageName());
+                Drawable image = resources.getDrawable(resourceId);
+                if (image != null) {
+                    image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
+                    toolbar.setLogo(image);
+                }
+            }
+
+            if (header.has("class")) {
+                JSONObject style = JasonHelper.style(header, this);
+                if (style.has("background")) {
+                    toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
                 }
 
-                if (header.has("class")) {
-                    JSONObject style = JasonHelper.style(header, this);
-                    if (style.has("background")) {
-                        toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
-                    }
-
-                    if (style.has("padding")) {
-                        int padding = Integer.parseInt(style.getString("padding"));
-                        toolbar.setPadding(padding, padding, padding, padding);
-                    }
-
-                    if (style.has("color")) {
-                        toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
-                    }
-
-                    if (style.has("font") || style.has("font:android")) {
-                        toolbar.setTitleFont(style);
-                    }
-                } else if (header.optJSONObject("style") != null) {
-                    String backgroundColor = header.optJSONObject("style").optString("background");
-                    if (backgroundColor != null && !backgroundColor.isEmpty()) {
-                        toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
-                    }
-                    if (header.optJSONObject("style").has("color")) {
-                        toolbar.setTitleTextColor(JasonHelper.parse_color(header.optJSONObject("style").getString("color")));
-                    }
+                if (style.has("padding")) {
+                    int padding = Integer.parseInt(style.getString("padding"));
+                    toolbar.setPadding(padding, padding, padding, padding);
                 }
-            } catch (Exception e) {
-                Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
-            }
 
-            try {
-                String color = header.getJSONObject("style").getString("color");
-                toolbar.setTitleTextColor(JasonHelper.parse_color(color));
-            } catch (Exception e) {
-                Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+                if (style.has("color")) {
+                    toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
+                }
+
+                if (style.has("font") || style.has("font:android")) {
+                    toolbar.setTitleFont(style);
+                }
+            } else if (header.optJSONObject("style") != null) {
+                String backgroundColor = header.optJSONObject("style").optString("background");
+                if (backgroundColor != null && !backgroundColor.isEmpty()) {
+                    toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
+                }
+                if (header.optJSONObject("style").has("color")) {
+                    toolbar.setTitleTextColor(JasonHelper.parse_color(header.optJSONObject("style").getString("color")));
+                }
             }
+        } catch (Exception e) {
+            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
+
+        try {
+            String color = header.getJSONObject("style").getString("color");
+            toolbar.setTitleTextColor(JasonHelper.parse_color(color));
+        } catch (Exception e) {
+            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+        }
+
     }
 
 
@@ -2378,6 +2378,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 if (style.has("color")) {
                     selectedTabColor = JasonHelper.parse_color(style.getString("color"));
                 }
+                tabLayout.setSelectedTabIndicatorColor(selectedTabColor);
 
                 if (style.has("color:disabled")) {
                     disabledTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
@@ -2459,6 +2460,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                             options.put("transition", "switchtab");
                             action.put("options", options);
                             href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
+                            onResume();
                         }
                     } catch (Exception e) {
                         Log.e("TABS", "Error while performing action on tab select", e);
