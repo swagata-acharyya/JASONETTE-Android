@@ -2427,11 +2427,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                                     }
                                     tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
                                     tabRenderedCount++;
-                                    if (items.length() == tabRenderedCount) {
-                                        for (Integer pos : tabItems.keySet()) {
-                                            tabLayout.addTab(tabItems.get(pos));
-                                        }
-                                    }
+                                    addTabsIfPossible(items.length());
                                 }
                             });
                 } else if (item.has("text")) {
@@ -2444,11 +2440,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
                     tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
                     tabRenderedCount++;
-                    if (items.length() == tabRenderedCount) {
-                        for (Integer pos : tabItems.keySet()) {
-                            tabLayout.addTab(tabItems.get(pos));
-                        }
-                    }
+                    addTabsIfPossible(items.length());
                 }
             }
 
@@ -2484,15 +2476,23 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 }
             });
 
-            for (int tabIndex = 0; tabIndex < tabLayout.getTabCount(); tabIndex++) {
-                TextView tabTextView = (TextView) (((LinearLayout) ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(tabIndex)).getChildAt(1));
-                tabTextView.setAllCaps(false);
-            }
-
             listView.setClipToPadding(false);
             listView.setPadding(0, 160, 0, 0);
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+        }
+    }
+
+    private void addTabsIfPossible(int totalTabs) {
+        if (totalTabs == tabRenderedCount) {
+            for (Integer pos : tabItems.keySet()) {
+                tabLayout.addTab(tabItems.get(pos));
+            }
+
+            for (int tabIndex = 0; tabIndex < tabLayout.getTabCount(); tabIndex++) {
+                TextView tabTextView = (TextView) (((LinearLayout) ((LinearLayout) tabLayout.getChildAt(0)).getChildAt(tabIndex)).getChildAt(1));
+                tabTextView.setAllCaps(false);
+            }
         }
     }
 
