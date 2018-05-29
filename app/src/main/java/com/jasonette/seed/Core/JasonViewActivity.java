@@ -107,6 +107,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private ArrayList<JSONObject> section_items;
     private HashMap<Integer, AHBottomNavigationItem> bottomNavigationItems;
     private Map<Integer, TabLayout.Tab> tabItems;
+    private Map<Integer, Boolean> tabRenderedMap;
     private int tabRenderedCount = 0;
     public HashMap<String, Object> modules;
     private SwipeRefreshLayout swipeLayout;
@@ -204,6 +205,17 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         // Set layout manager to position the items
         listView.setLayoutManager(new LinearLayoutManager(this));
 
+        if (null == tabLayout) {
+            LinearLayout.LayoutParams tabLayoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            tabLayoutParams.topMargin = null != toolbar ? toolbar.getHeight() : 0;
+            tabLayoutParams.setMargins(0, null != toolbar ? toolbar.getHeight() : 0, 0, 0);
+            tabLayout = new TabLayout(JasonViewActivity.this);
+            tabLayout.setTabMode(TabLayout.MODE_FIXED);
+            tabLayout.setLayoutParams(tabLayoutParams);
+        }
+
         // 4.2. LinearLayout
         if (sectionLayout == null) {
             // Create LinearLayout
@@ -214,6 +226,11 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
             // Add toolbar to LinearLayout
             if (toolbar != null) sectionLayout.addView(toolbar);
+
+            if (tabLayout != null) {
+                sectionLayout.addView(tabLayout);
+                tabLayout.setVisibility(View.GONE);
+            }
 
             // Add RecyclerView to LinearLayout
             if (listView != null) sectionLayout.addView(listView);
@@ -2353,19 +2370,14 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private void setupTabLayout(JSONObject tabs) {
         try {
             final JSONArray items = tabs.getJSONArray("items");
-
-            if (null == tabLayout) {
-                RelativeLayout.LayoutParams tabLayoutParams = new RelativeLayout.LayoutParams(
-                        RelativeLayout.LayoutParams.MATCH_PARENT,
-                        RelativeLayout.LayoutParams.WRAP_CONTENT);
-                tabLayout = new TabLayout(this);
-                tabLayout.setTabMode(TabLayout.MODE_FIXED);
-                tabLayout.setLayoutParams(tabLayoutParams);
-                rootLayout.addView(tabLayout);
-            }
+            tabLayout.setVisibility(View.VISIBLE);
 
             if (null == tabItems) {
                 tabItems = new TreeMap<>();
+            }
+
+            if (null == tabRenderedMap) {
+                tabRenderedMap = new HashMap<>();
             }
 
             JSONObject style;
@@ -2460,7 +2472,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                             options.put("transition", "switchtab");
                             action.put("options", options);
                             href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
-                            onResume();
+                            if (!tabRenderedMap.containsKey(tab.getPosition())) {
+                                tabRenderedMap.put(tab.getPosition(), true);
+                                onResume();
+                            }
                         }
                     } catch (Exception e) {
                         Log.e("TABS", "Error while performing action on tab select", e);
