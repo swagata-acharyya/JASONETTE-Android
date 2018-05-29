@@ -2465,7 +2465,16 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     tab.getIcon().setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
                     try {
                         JSONObject item = items.getJSONObject(tab.getPosition());
-                        if (item.has("url")) {
+                        if (item.has("href")) {
+                            JSONObject action = new JSONObject();
+                            JSONObject href = item.getJSONObject("href");
+                            action.put("options", href);
+                            href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
+                            if (!renderedTabs.contains(tab.getPosition())) {
+                                renderedTabs.add(tab.getPosition());
+                                onResume();
+                            }
+                        } else if (item.has("url")) {
                             String url = item.getString("url");
                             JSONObject action = new JSONObject();
                             JSONObject options = new JSONObject();
