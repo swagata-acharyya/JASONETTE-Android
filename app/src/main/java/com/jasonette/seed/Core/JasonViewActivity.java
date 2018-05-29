@@ -78,6 +78,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
@@ -107,8 +108,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private ArrayList<JSONObject> section_items;
     private HashMap<Integer, AHBottomNavigationItem> bottomNavigationItems;
     private Map<Integer, TabLayout.Tab> tabItems;
-    private Map<Integer, Boolean> tabRenderedMap;
-    private int tabRenderedCount = 0;
+    private List<Integer> renderedTabs;
+    private int tabsAdded = 0;
     public HashMap<String, Object> modules;
     private SwipeRefreshLayout swipeLayout;
     public LinearLayout sectionLayout;
@@ -2376,8 +2377,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 tabItems = new TreeMap<>();
             }
 
-            if (null == tabRenderedMap) {
-                tabRenderedMap = new HashMap<>();
+            if (null == renderedTabs) {
+                renderedTabs = new ArrayList<>();
             }
 
             JSONObject style;
@@ -2407,7 +2408,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             final int disabledColor = disabledTabColor;
 
             for (int i = 0; i < items.length(); i++) {
-                tabRenderedCount = 0;
+                tabsAdded = 0;
                 final JSONObject item = items.getJSONObject(i);
                 final int position = item.has("position") ? Integer.parseInt(item.getString("position")) : 0;
                 if (item.has("image")) {
@@ -2439,7 +2440,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                                         DrawableCompat.setTint(DrawableCompat.wrap(drawable), color);
                                     }
                                     tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
-                                    tabRenderedCount++;
+                                    tabsAdded++;
                                     addTabsIfPossible(items.length());
                                 }
                             });
@@ -2452,7 +2453,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     }
                     ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
                     tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
-                    tabRenderedCount++;
+                    tabsAdded++;
                     addTabsIfPossible(items.length());
                 }
             }
@@ -2472,8 +2473,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                             options.put("transition", "switchtab");
                             action.put("options", options);
                             href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
-                            if (!tabRenderedMap.containsKey(tab.getPosition())) {
-                                tabRenderedMap.put(tab.getPosition(), true);
+                            if (!renderedTabs.contains(tab.getPosition())) {
+                                renderedTabs.add(tab.getPosition());
                                 onResume();
                             }
                         }
@@ -2501,7 +2502,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     }
 
     private void addTabsIfPossible(int totalTabs) {
-        if (totalTabs == tabRenderedCount) {
+        if (totalTabs == tabsAdded) {
             for (Integer pos : tabItems.keySet()) {
                 tabLayout.addTab(tabItems.get(pos));
             }
