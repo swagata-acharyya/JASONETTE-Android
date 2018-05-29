@@ -109,7 +109,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private HashMap<Integer, AHBottomNavigationItem> bottomNavigationItems;
     private Map<Integer, TabLayout.Tab> tabItems;
     private List<Integer> renderedTabs;
-    private int tabsAdded = 0;
     public HashMap<String, Object> modules;
     private SwipeRefreshLayout swipeLayout;
     public LinearLayout sectionLayout;
@@ -2408,7 +2407,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             final int disabledColor = disabledTabColor;
 
             for (int i = 0; i < items.length(); i++) {
-                tabsAdded = 0;
                 final JSONObject item = items.getJSONObject(i);
                 final int position = item.has("position") ? Integer.parseInt(item.getString("position")) : 0;
                 if (item.has("image")) {
@@ -2440,7 +2438,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                                         DrawableCompat.setTint(DrawableCompat.wrap(drawable), color);
                                     }
                                     tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
-                                    tabsAdded++;
                                     addTabsIfPossible(items.length());
                                 }
                             });
@@ -2453,7 +2450,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     }
                     ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
                     tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
-                    tabsAdded++;
                     addTabsIfPossible(items.length());
                 }
             }
@@ -2511,7 +2507,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     }
 
     private void addTabsIfPossible(int totalTabs) {
-        if (totalTabs == tabsAdded) {
+        if (totalTabs == tabItems.size()) {
             for (Integer pos : tabItems.keySet()) {
                 tabLayout.addTab(tabItems.get(pos));
             }
