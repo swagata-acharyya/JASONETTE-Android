@@ -109,6 +109,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private HashMap<Integer, AHBottomNavigationItem> bottomNavigationItems;
     private Map<Integer, TabLayout.Tab> tabItems;
     private List<Integer> renderedTabs;
+    private TabLayout tabLayout;
+    private boolean hrefTabSelected;
     public HashMap<String, Object> modules;
     private SwipeRefreshLayout swipeLayout;
     public LinearLayout sectionLayout;
@@ -135,7 +137,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     JSONObject intent_to_resolve;
     public JSONObject agents = new JSONObject();
     private boolean isexecuting = false;
-    private TabLayout tabLayout;
 
     /*************************************************************
      *
@@ -209,7 +210,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             LinearLayout.LayoutParams tabLayoutParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
                     LinearLayout.LayoutParams.WRAP_CONTENT);
-            tabLayoutParams.topMargin = null != toolbar ? toolbar.getHeight() : 0;
             tabLayoutParams.setMargins(0, null != toolbar ? toolbar.getHeight() : 0, 0, 0);
             tabLayout = new TabLayout(JasonViewActivity.this);
             tabLayout.setTabMode(TabLayout.MODE_FIXED);
@@ -541,8 +541,9 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 editor.remove(model.url);
                 editor.commit();
 
-                if (null != tabLayout && tabLayout.getTabCount() > 0) {
+                if (null != tabLayout && tabLayout.getTabCount() > 0 && hrefTabSelected) {
                     tabLayout.getTabAt(0).select();
+                    hrefTabSelected = false;
                 }
             } catch (Exception e) {
                 Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
@@ -2016,15 +2017,13 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
                     // Set header
                     if (body.has("header")) {
-                        JSONObject header = body.getJSONObject("header");
-                        setup_header(header);
+                        setup_header(body.getJSONObject("header"));
                         toolbar.setVisibility(View.VISIBLE);
                     } else {
                         toolbar.setVisibility(View.GONE);
                     }
 
-                    boolean isTabLayout = body.has("tabs");
-                    if (isTabLayout) {
+                    if (body.has("tabs")) {
                         try {
                             setupTabLayout(body.getJSONObject("tabs"));
                         } catch (JSONException e) {
@@ -2383,8 +2382,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             }
 
             JSONObject style;
-            int selectedTabColor = JasonHelper.parse_color("#FFFFFF");
-            int disabledTabColor = JasonHelper.parse_color("#C0C0C0");
+            int selectedTabColor = R.color.colorPrimaryDark;
+            int normalTabColor = R.color.colorPrimary;
 
             if (tabs.has("style")) {
                 style = tabs.getJSONObject("style");
@@ -2395,9 +2394,9 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 tabLayout.setSelectedTabIndicatorColor(selectedTabColor);
 
                 if (style.has("color:disabled")) {
-                    disabledTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
+                    normalTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
                 }
-                tabLayout.setTabTextColors(disabledTabColor, selectedTabColor);
+                tabLayout.setTabTextColors(normalTabColor, selectedTabColor);
 
                 if (style.has("background")) {
                     int background = JasonHelper.parse_color(style.getString("background"));
@@ -2406,7 +2405,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             }
 
             final int selectedColor = selectedTabColor;
-            final int disabledColor = disabledTabColor;
+            final int normalColor = normalTabColor;
 
             for (int i = 0; i < items.length(); i++) {
                 final JSONObject item = items.getJSONObject(i);
@@ -2433,7 +2432,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
                                     Drawable drawable = new BitmapDrawable(getResources(), resource);
-                                    int color = (position == 1) ? selectedColor : disabledColor;
+                                    int color = (position == 1) ? selectedColor : normalColor;
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                                         drawable.setTint(color);
                                     } else {
@@ -2464,15 +2463,13 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     try {
                         JSONObject item = items.getJSONObject(tab.getPosition());
                         if (item.has("href")) {
+                            hrefTabSelected = true;
                             JSONObject action = new JSONObject();
                             JSONObject href = item.getJSONObject("href");
                             action.put("options", href);
                             href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
-                            if (!renderedTabs.contains(tab.getPosition())) {
-                                renderedTabs.add(tab.getPosition());
-                                onResume();
-                            }
                         } else if (item.has("url")) {
+                            hrefTabSelected = false;
                             String url = item.getString("url");
                             JSONObject action = new JSONObject();
                             JSONObject options = new JSONObject();
@@ -2480,10 +2477,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                             options.put("transition", "switchtab");
                             action.put("options", options);
                             href(action, new JSONObject(), new JSONObject(), JasonViewActivity.this);
-                            if (!renderedTabs.contains(tab.getPosition())) {
-                                renderedTabs.add(tab.getPosition());
-                                onResume();
-                            }
+                        }
+                        if (!renderedTabs.contains(tab.getPosition())) {
+                            renderedTabs.add(tab.getPosition());
+                            onResume();
                         }
                     } catch (Exception e) {
                         Log.e("TABS", "Error while performing action on tab select", e);
@@ -2492,7 +2489,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
                 @Override
                 public void onTabUnselected(TabLayout.Tab tab) {
-                    tab.getIcon().setColorFilter(disabledColor, PorterDuff.Mode.SRC_IN);
+                    tab.getIcon().setColorFilter(normalColor, PorterDuff.Mode.SRC_IN);
                 }
 
                 @Override
@@ -2504,7 +2501,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             listView.setClipToPadding(false);
             listView.setPadding(0, 160, 0, 0);
         } catch (Exception e) {
-            Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
+            Log.e("TABS", "Error while setting up tab layout", e);
         }
     }
 
