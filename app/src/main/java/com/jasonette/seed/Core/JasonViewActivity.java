@@ -541,6 +541,9 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 editor.remove(model.url);
                 editor.commit();
 
+                if (null != tabLayout && tabLayout.getTabCount() > 0) {
+                    tabLayout.getTabAt(0).select();
+                }
             } catch (Exception e) {
                 Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
             }
@@ -584,7 +587,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         if (listState != null) {
             listView.getLayoutManager().onRestoreInstanceState(listState);
         }
-
     }
 
 
