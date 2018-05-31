@@ -2381,27 +2381,23 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 renderedTabs = new ArrayList<>();
             }
 
-            JSONObject style;
+            JSONObject style = JasonHelper.style(tabs, this);
             int selectedTabColor = R.color.colorPrimaryDark;
             int normalTabColor = R.color.colorPrimary;
 
-            if (tabs.has("style")) {
-                style = tabs.getJSONObject("style");
+            if (style.has("color")) {
+                selectedTabColor = JasonHelper.parse_color(style.getString("color"));
+            }
+            tabLayout.setSelectedTabIndicatorColor(selectedTabColor);
 
-                if (style.has("color")) {
-                    selectedTabColor = JasonHelper.parse_color(style.getString("color"));
-                }
-                tabLayout.setSelectedTabIndicatorColor(selectedTabColor);
+            if (style.has("color:disabled")) {
+                normalTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
+            }
+            tabLayout.setTabTextColors(normalTabColor, selectedTabColor);
 
-                if (style.has("color:disabled")) {
-                    normalTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
-                }
-                tabLayout.setTabTextColors(normalTabColor, selectedTabColor);
-
-                if (style.has("background")) {
-                    int background = JasonHelper.parse_color(style.getString("background"));
-                    tabLayout.setBackgroundColor(background);
-                }
+            if (style.has("background")) {
+                int background = JasonHelper.parse_color(style.getString("background"));
+                tabLayout.setBackgroundColor(background);
             }
 
             final int selectedColor = selectedTabColor;
