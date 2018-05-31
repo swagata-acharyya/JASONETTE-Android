@@ -207,13 +207,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
         listView.setLayoutManager(new LinearLayoutManager(this));
 
         if (null == tabLayout) {
-            LinearLayout.LayoutParams tabLayoutParams = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
-            tabLayoutParams.setMargins(0, null != toolbar ? toolbar.getHeight() : 0, 0, 0);
             tabLayout = new TabLayout(JasonViewActivity.this);
             tabLayout.setTabMode(TabLayout.MODE_FIXED);
-            tabLayout.setLayoutParams(tabLayoutParams);
         }
 
         // 4.2. LinearLayout
@@ -2381,14 +2376,19 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 renderedTabs = new ArrayList<>();
             }
 
-            JSONObject style = JasonHelper.style(tabs, this);
             int selectedTabColor = R.color.colorPrimaryDark;
             int normalTabColor = R.color.colorPrimary;
+            int indicatorColor = R.color.colorAccent;
+            int tabHeight = LinearLayout.LayoutParams.WRAP_CONTENT;
 
+            JSONObject style = JasonHelper.style(tabs, this);
             if (style.has("color")) {
                 selectedTabColor = JasonHelper.parse_color(style.getString("color"));
             }
-            tabLayout.setSelectedTabIndicatorColor(selectedTabColor);
+            if (style.has("indicator_color")) {
+                indicatorColor = JasonHelper.parse_color(style.getString("indicator_color"));
+            }
+            tabLayout.setSelectedTabIndicatorColor(indicatorColor);
 
             if (style.has("color:disabled")) {
                 normalTabColor = JasonHelper.parse_color(style.getString("color:disabled"));
@@ -2400,12 +2400,90 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 tabLayout.setBackgroundColor(background);
             }
 
+            if (style.has("height")) {
+                tabHeight = Integer.parseInt(style.getString("height"));
+            }
+
+            LinearLayout.LayoutParams tabLayoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, tabHeight);
+            tabLayout.setLayoutParams(tabLayoutParams);
+
             final int selectedColor = selectedTabColor;
             final int normalColor = normalTabColor;
+            final int tabItemId = View.generateViewId();
+            final int titleId = View.generateViewId();
+            final int iconId = View.generateViewId();
 
             for (int i = 0; i < items.length(); i++) {
                 final JSONObject item = items.getJSONObject(i);
                 final int position = item.has("position") ? Integer.parseInt(item.getString("position")) : 0;
+
+                int height = 100;
+                int width = 100;
+                float textSize = Float.NaN;
+                int paddingLeft = 0;
+                int paddingTop = 0;
+                int paddingRight = 0;
+                int paddingBottom = 0;
+
+                JSONObject itemStyle = JasonHelper.style(item, this);
+
+                try {
+                    if (itemStyle.has("height")) {
+                        height = Integer.parseInt(itemStyle.getString("height"));
+                    }
+                    if (itemStyle.has("width")) {
+                        width = Integer.parseInt(itemStyle.getString("width"));
+                    }
+                    if (itemStyle.has("size")) {
+                        textSize = Float.parseFloat(itemStyle.getString("size"));
+                    }
+                    if (itemStyle.has("padding")) {
+                        paddingLeft = paddingTop = paddingRight = paddingBottom = Integer.parseInt(itemStyle.getString("padding"));
+                    }
+                    if (itemStyle.has("padding_left")) {
+                        paddingLeft = Integer.parseInt(itemStyle.getString("padding_left"));
+                    }
+                    if (itemStyle.has("padding_top")) {
+                        paddingTop = Integer.parseInt(itemStyle.getString("padding_top"));
+                    }
+                    if (itemStyle.has("padding_right")) {
+                        paddingRight = Integer.parseInt(itemStyle.getString("padding_right"));
+                    }
+                    if (itemStyle.has("padding_bottom")) {
+                        paddingBottom = Integer.parseInt(itemStyle.getString("padding_bottom"));
+                    }
+                } catch (JSONException e) {
+                    Log.e("TABS", "Error while reading syles", e);
+                }
+
+                LinearLayout.LayoutParams textViewLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                final TextView title = new TextView(this);
+                title.setId(titleId);
+                title.setTextColor(normalColor);
+                title.setMaxLines(2);
+                if (!Float.isNaN(textSize)) {
+                    title.setTextSize(textSize);
+                }
+                title.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+                JasonHelper.setTextViewFont(title, itemStyle, this);
+                title.setLayoutParams(textViewLayoutParams);
+
+                LinearLayout.LayoutParams imageLayoutParams = new LinearLayout.LayoutParams(height, width);
+                final ImageView icon = new ImageView(this);
+                icon.setId(iconId);
+                icon.setLayoutParams(imageLayoutParams);
+
+                LinearLayout.LayoutParams tabItemLayoutParams = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                final LinearLayout tabItemLayout = new LinearLayout(this);
+                tabItemLayout.setOrientation(LinearLayout.VERTICAL);
+                tabItemLayout.setLayoutParams(tabItemLayoutParams);
+                tabItemLayout.setGravity(Gravity.CENTER);
+                tabItemLayout.setId(tabItemId);
+                tabItemLayout.addView(icon);
+                tabItemLayout.addView(title);
+
                 if (item.has("image")) {
                     String tempText = "";
                     try {
@@ -2419,11 +2497,9 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
                     JSONObject c = new JSONObject();
                     c.put("url", item.getString("image"));
-                    Glide
-                            .with(this).asBitmap()
+                    Glide.with(this).asBitmap()
                             .load(JasonImageComponent.resolve_url(c, JasonViewActivity.this))
-
-                            .into(new SimpleTarget<Bitmap>(100, 100) {
+                            .into(new SimpleTarget<Bitmap>(height, width) {
 
                                 @Override
                                 public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
@@ -2434,7 +2510,9 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                                     } else {
                                         DrawableCompat.setTint(DrawableCompat.wrap(drawable), color);
                                     }
-                                    tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
+                                    title.setText(text);
+                                    icon.setImageDrawable(drawable);
+                                    tabItems.put(position, tabLayout.newTab().setCustomView(tabItemLayout));
                                     addTabsIfPossible(items.length());
                                 }
                             });
@@ -2446,7 +2524,9 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                         Log.e("TABS", "Error while getting text", e);
                     }
                     ColorDrawable drawable = new ColorDrawable(Color.TRANSPARENT);
-                    tabItems.put(position, tabLayout.newTab().setText(text).setIcon(drawable));
+                    title.setText(text);
+                    icon.setImageDrawable(drawable);
+                    tabItems.put(position, tabLayout.newTab().setCustomView(tabItemLayout));
                     addTabsIfPossible(items.length());
                 }
             }
@@ -2455,7 +2535,12 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
                 @Override
                 public void onTabSelected(TabLayout.Tab tab) {
-                    tab.getIcon().setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
+                    LinearLayout tabItem = tab.getCustomView().findViewById(tabItemId);
+                    TextView title = tabItem.findViewById(titleId);
+                    title.setTextColor(selectedColor);
+                    ImageView icon = tabItem.findViewById(iconId);
+                    icon.setColorFilter(selectedColor, PorterDuff.Mode.SRC_IN);
+
                     try {
                         JSONObject item = items.getJSONObject(tab.getPosition());
                         if (item.has("href")) {
@@ -2485,7 +2570,11 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
                 @Override
                 public void onTabUnselected(TabLayout.Tab tab) {
-                    tab.getIcon().setColorFilter(normalColor, PorterDuff.Mode.SRC_IN);
+                    LinearLayout tabItem = tab.getCustomView().findViewById(tabItemId);
+                    TextView title = tabItem.findViewById(titleId);
+                    title.setTextColor(normalColor);
+                    ImageView icon = tabItem.findViewById(iconId);
+                    icon.setColorFilter(normalColor, PorterDuff.Mode.SRC_IN);
                 }
 
                 @Override
