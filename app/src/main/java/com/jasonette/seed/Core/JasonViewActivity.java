@@ -64,6 +64,7 @@ import com.jasonette.seed.Lib.JasonToolbar;
 import com.jasonette.seed.Lib.MaterialBadgeTextView;
 import com.jasonette.seed.R;
 import com.jasonette.seed.Section.ItemAdapter;
+import com.jasonette.seed.utils.MoEngageUtil;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import org.json.JSONArray;
@@ -259,6 +260,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
         } else {
             url = getString(R.string.url);
+        }
+
+        if(intent.hasExtra("analytics_key")) {
+            MoEngageUtil.addKey(getApplication(),intent.getStringExtra("analytics_key"));
         }
         depth = intent.getIntExtra("depth", 0);
         preload = null;

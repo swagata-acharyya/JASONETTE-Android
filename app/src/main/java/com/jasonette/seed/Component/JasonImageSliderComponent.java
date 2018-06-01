@@ -45,6 +45,7 @@ public class JasonImageSliderComponent {
                 actionUrls = urlsMap.get(ACTION_URLS);
 
                 RequestOptions requestOptions = new RequestOptions();
+                requestOptions.dontAnimate();
                 requestOptions.centerCrop();
                 Log.d("IMAGESLIDER", "URL size " + imageUrls.size());
                 ((SliderLayout) view).removeAllSliders();
@@ -70,7 +71,7 @@ public class JasonImageSliderComponent {
                     });
                 }
 
-                ((SliderLayout) view).setPresetTransformer(SliderLayout.Transformer.Accordion);
+                ((SliderLayout) view).setPresetTransformer(SliderLayout.Transformer.Default);
 
                 ((SliderLayout) view).setPresetIndicator(SliderLayout.PresetIndicators.Center_Bottom);
                 ((SliderLayout) view).setCustomAnimation(new DescriptionAnimation());
