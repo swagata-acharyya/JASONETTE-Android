@@ -11,6 +11,8 @@ import android.util.Log;
 import com.facebook.stetho.inspector.console.CLog;
 import com.facebook.stetho.inspector.console.ConsolePeerManager;
 import com.facebook.stetho.inspector.protocol.module.Console;
+//import java.io.Console;
+
 import timber.log.Timber;
 
 /**

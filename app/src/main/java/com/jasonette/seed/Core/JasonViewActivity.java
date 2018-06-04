@@ -42,6 +42,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -57,6 +58,7 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.jasonette.seed.Component.JasonComponentFactory;
 import com.jasonette.seed.Component.JasonImageComponent;
+import com.jasonette.seed.Component.JasonTextfieldComponent;
 import com.jasonette.seed.Helper.JasonHelper;
 import com.jasonette.seed.Launcher.Launcher;
 import com.jasonette.seed.Lib.JasonToolbar;
@@ -65,6 +67,7 @@ import com.jasonette.seed.R;
 import com.jasonette.seed.Section.ItemAdapter;
 import com.jasonette.seed.Service.agent.JasonAgentService;
 import com.jasonette.seed.Service.vision.JasonVisionService;
+import com.jasonette.seed.utils.MoEngageUtil;
 import com.yqritc.recyclerviewflexibledivider.HorizontalDividerItemDecoration;
 
 import org.json.JSONArray;
@@ -105,6 +108,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
     private int header_height;
     private ImageView logoView;
+    private View editTextView;
     private ArrayList<JSONObject> section_items;
     private HashMap<Integer, AHBottomNavigationItem> bottomNavigationItems;
     private Map<Integer, TabLayout.Tab> tabItems;
@@ -277,6 +281,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
         } else {
             url = getString(R.string.url);
+        }
+
+        if(intent.hasExtra("analytics_key")) {
+            MoEngageUtil.addKey(getApplication(),intent.getStringExtra("analytics_key"));
         }
         depth = intent.getIntExtra("depth", 0);
         preload = null;
@@ -3179,6 +3187,67 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                         }
 
                         toolbar.setTitle(text);
+
+                        if (logoView != null) {
+                            toolbar.removeView(logoView);
+                            logoView = null;
+                        }
+                    } else if (type.equalsIgnoreCase("textfield")) {
+                        if (null == editTextView) {
+                            editTextView = new EditText(this);
+                        }
+                        editTextView = JasonTextfieldComponent.build(editTextView, t, header, this);
+
+                        int width = Toolbar.LayoutParams.MATCH_PARENT;
+                        int height = Toolbar.LayoutParams.WRAP_CONTENT;
+
+                        int paddingLeft = (int)JasonHelper.pixels(this, "10", "horizontal");
+                        int paddingRight = (int)JasonHelper.pixels(this, "10", "horizontal");
+                        int paddingTop = (int)JasonHelper.pixels(this, "10", "vertical");
+                        int paddingBottom = (int)JasonHelper.pixels(this, "10", "vertical");
+
+                        if (null != style) {
+                            if (style.has("width")) {
+                                try {
+                                    width = (int) JasonHelper.pixels(this, style.getString("width"), "horizontal");
+                                } catch (Exception e) {
+                                    Log.e("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString(), e);
+                                }
+                            }
+                            if (style.has("height")) {
+                                try {
+                                    height = (int) JasonHelper.pixels(this, style.getString("height"), "vertical");
+                                } catch (Exception e) {
+                                    Log.e("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString(), e);
+                                }
+                            }
+                            if (style.has("padding")) {
+                                paddingLeft = (int) JasonHelper.pixels(this, style.getString("padding"), "horizontal");
+                                paddingRight = paddingLeft;
+                                paddingTop = paddingLeft;
+                                paddingBottom = paddingLeft;
+                            }
+
+                            // overwrite if more specific values exist
+                            if (style.has("padding_left")) {
+                                paddingLeft = (int) JasonHelper.pixels(this, style.getString("padding_left"), "horizontal");
+                            }
+                            if (style.has("padding_right")) {
+                                paddingRight = (int) JasonHelper.pixels(this, style.getString("padding_right"), "horizontal");
+                            }
+                            if (style.has("padding_top")) {
+                                paddingTop = (int) JasonHelper.pixels(this, style.getString("padding_top"), "vertical");
+                            }
+                            if (style.has("padding_bottom")) {
+                                paddingBottom = (int) JasonHelper.pixels(this, style.getString("padding_bottom"), "vertical");
+                            }
+                        }
+
+                        Toolbar.LayoutParams layoutParams = new Toolbar.LayoutParams(width, height);
+                        editTextView.setLayoutParams(layoutParams);
+                        editTextView.setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom);
+
+                        toolbar.addView(editTextView);
 
                         if (logoView != null) {
                             toolbar.removeView(logoView);

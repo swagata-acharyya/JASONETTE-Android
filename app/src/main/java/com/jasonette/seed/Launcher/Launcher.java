@@ -114,9 +114,7 @@ public class Launcher extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
         ViewTarget.setTagId(R.id.glide_request);
-
         // Look for all extensions and initialize them if they have initialize class methods
         try {
             String[] fileList = getAssets().list("file");
