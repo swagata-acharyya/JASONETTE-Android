@@ -40,6 +40,8 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.widget.EditText;
@@ -283,6 +285,8 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             url = getString(R.string.url);
         }
 
+        setStatusBarColor(Color.BLACK);
+
         if(intent.hasExtra("analytics_key")) {
             MoEngageUtil.addKey(getApplication(),intent.getStringExtra("analytics_key"));
         }
@@ -348,6 +352,15 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             onRefresh();
         }
 
+    }
+
+    private void setStatusBarColor(int color) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = this.getWindow();
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(color);
+        }
     }
 
     private void setup_agents() {
