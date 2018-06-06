@@ -2170,12 +2170,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 }
             }
 
-            if (header.has("home_button_enabled")) {
-                if (header.getString("home_button_enabled").equalsIgnoreCase("true")) {
-                    if (null != getSupportActionBar()) {
-                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                        getSupportActionBar().setDisplayShowHomeEnabled(true);
-                    }
+            if (header.has("home_button_enabled") && header.getString("home_button_enabled").equalsIgnoreCase("true")) {
+                if (null != getSupportActionBar()) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
                 }
             } else {
                 getSupportActionBar().setDisplayHomeAsUpEnabled(false);
