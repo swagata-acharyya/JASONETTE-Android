@@ -2158,48 +2158,37 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
     private void setup_header(JSONObject header) {
         try {
             int color = Color.WHITE;
-            if (header.has("class")) {
-                JSONObject style = JasonHelper.style(header, this);
-                if (style.has("background")) {
-                    toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
-                }
+            JSONObject style = JasonHelper.style(header, this);
 
-                if (style.has("padding")) {
-                    int padding = Integer.parseInt(style.getString("padding"));
-                    toolbar.setPadding(padding, padding, padding, padding);
-                }
+            if (style.has("background")) {
+                toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+            }
 
-                if (style.has("color")) {
-                    color = JasonHelper.parse_color(style.getString("color"));
-                    toolbar.setTitleTextColor(color);
-                }
+            if (style.has("padding")) {
+                int padding = Integer.parseInt(style.getString("padding"));
+                toolbar.setPadding(padding, padding, padding, padding);
+            }
 
-                if (style.has("font") || style.has("font:android")) {
-                    toolbar.setTitleFont(style);
-                }
-            } else if (header.optJSONObject("style") != null) {
-                String backgroundColor = header.optJSONObject("style").optString("background");
-                if (backgroundColor != null && !backgroundColor.isEmpty()) {
-                    toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
-                }
-                if (header.optJSONObject("style").has("color")) {
-                    color = JasonHelper.parse_color(header.optJSONObject("style").getString("color"));
-                    toolbar.setTitleTextColor(color);
-                }
+            if (style.has("color")) {
+                color = JasonHelper.parse_color(style.getString("color"));
+                toolbar.setTitleTextColor(color);
+            }
+
+            if (style.has("font") || style.has("font:android")) {
+                toolbar.setTitleFont(style);
             }
 
             boolean homeButtonEnabled = false;
             if (header.has("home_button_enabled") && header.getString("home_button_enabled").equalsIgnoreCase("true")) {
                 if (null != getSupportActionBar()) {
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    homeButtonEnabled = true;
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if (null != toolbar && null != toolbar.getNavigationIcon()) {
                             toolbar.getNavigationIcon().setTint(color);
                         }
                     }
-
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setDisplayShowHomeEnabled(true);
-                    homeButtonEnabled = true;
                 }
             } else {
                 homeButtonEnabled = false;
