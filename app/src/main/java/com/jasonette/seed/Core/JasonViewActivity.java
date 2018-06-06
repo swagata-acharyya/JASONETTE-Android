@@ -2157,9 +2157,21 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
     private void setup_header(JSONObject header) {
         try {
+            boolean homeButtonEnabled = false;
+            if (header.has("home_button_enabled") && header.getString("home_button_enabled").equalsIgnoreCase("true")) {
+                if (null != getSupportActionBar()) {
+                    homeButtonEnabled = true;
+                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                    getSupportActionBar().setDisplayShowHomeEnabled(true);
+                }
+            } else {
+                homeButtonEnabled = false;
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                getSupportActionBar().setDisplayShowHomeEnabled(false);
+            }
 
             String logo = header.optString("logo");
-            if (logo != null || !logo.isEmpty()) {
+            if ((logo != null || !logo.isEmpty()) && !homeButtonEnabled) {
                 Resources resources = getApplicationContext().getResources();
                 final int resourceId = resources.getIdentifier(logo, "drawable",
                         getApplicationContext().getPackageName());
@@ -2168,16 +2180,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     image.setColorFilter(getResources().getColor(R.color.tintColor), PorterDuff.Mode.SRC_IN);
                     toolbar.setLogo(image);
                 }
-            }
-
-            if (header.has("home_button_enabled") && header.getString("home_button_enabled").equalsIgnoreCase("true")) {
-                if (null != getSupportActionBar()) {
-                    getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                    getSupportActionBar().setDisplayShowHomeEnabled(true);
-                }
-            } else {
-                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-                getSupportActionBar().setDisplayShowHomeEnabled(false);
             }
 
             if (header.has("class")) {
