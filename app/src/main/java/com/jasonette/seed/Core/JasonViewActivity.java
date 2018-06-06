@@ -2197,7 +2197,7 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             }
 
             String logo = header.optString("logo");
-            if ((logo != null || !logo.isEmpty()) && !homeButtonEnabled) {
+            if (logo != null && !logo.isEmpty() && !homeButtonEnabled) {
                 Resources resources = getApplicationContext().getResources();
                 final int resourceId = resources.getIdentifier(logo, "drawable",
                         getApplicationContext().getPackageName());
