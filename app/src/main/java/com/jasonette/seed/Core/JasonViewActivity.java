@@ -2157,13 +2157,40 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
 
     private void setup_header(JSONObject header) {
         try {
+            int color = Color.WHITE;
+            if (header.has("class")) {
+                JSONObject style = JasonHelper.style(header, this);
+                if (style.has("background")) {
+                    toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
+                }
+
+                if (style.has("padding")) {
+                    int padding = Integer.parseInt(style.getString("padding"));
+                    toolbar.setPadding(padding, padding, padding, padding);
+                }
+
+                if (style.has("color")) {
+                    color = JasonHelper.parse_color(style.getString("color"));
+                    toolbar.setTitleTextColor(color);
+                }
+
+                if (style.has("font") || style.has("font:android")) {
+                    toolbar.setTitleFont(style);
+                }
+            } else if (header.optJSONObject("style") != null) {
+                String backgroundColor = header.optJSONObject("style").optString("background");
+                if (backgroundColor != null && !backgroundColor.isEmpty()) {
+                    toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
+                }
+                if (header.optJSONObject("style").has("color")) {
+                    color = JasonHelper.parse_color(header.optJSONObject("style").getString("color"));
+                    toolbar.setTitleTextColor(color);
+                }
+            }
+
             boolean homeButtonEnabled = false;
             if (header.has("home_button_enabled") && header.getString("home_button_enabled").equalsIgnoreCase("true")) {
                 if (null != getSupportActionBar()) {
-                    int color = Color.WHITE;
-                    if (header.has("color")) {
-                        color = JasonHelper.parse_color(header.getString("color"));
-                    }
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                         if (null != toolbar && null != toolbar.getNavigationIcon()) {
                             toolbar.getNavigationIcon().setTint(color);
@@ -2192,33 +2219,6 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 }
             }
 
-            if (header.has("class")) {
-                JSONObject style = JasonHelper.style(header, this);
-                if (style.has("background")) {
-                    toolbar.setBackgroundColor(JasonHelper.parse_color(style.getString("background")));
-                }
-
-                if (style.has("padding")) {
-                    int padding = Integer.parseInt(style.getString("padding"));
-                    toolbar.setPadding(padding, padding, padding, padding);
-                }
-
-                if (style.has("color")) {
-                    toolbar.setTitleTextColor(JasonHelper.parse_color(style.getString("color")));
-                }
-
-                if (style.has("font") || style.has("font:android")) {
-                    toolbar.setTitleFont(style);
-                }
-            } else if (header.optJSONObject("style") != null) {
-                String backgroundColor = header.optJSONObject("style").optString("background");
-                if (backgroundColor != null && !backgroundColor.isEmpty()) {
-                    toolbar.setBackgroundColor(JasonHelper.parse_color(backgroundColor));
-                }
-                if (header.optJSONObject("style").has("color")) {
-                    toolbar.setTitleTextColor(JasonHelper.parse_color(header.optJSONObject("style").getString("color")));
-                }
-            }
         } catch (Exception e) {
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
