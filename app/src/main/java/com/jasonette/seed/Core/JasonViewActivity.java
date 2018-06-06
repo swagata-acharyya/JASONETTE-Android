@@ -2160,9 +2160,19 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             boolean homeButtonEnabled = false;
             if (header.has("home_button_enabled") && header.getString("home_button_enabled").equalsIgnoreCase("true")) {
                 if (null != getSupportActionBar()) {
-                    homeButtonEnabled = true;
+                    int color = Color.WHITE;
+                    if (header.has("color")) {
+                        color = JasonHelper.parse_color(header.getString("color"));
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        if (null != toolbar && null != toolbar.getNavigationIcon()) {
+                            toolbar.getNavigationIcon().setTint(color);
+                        }
+                    }
+
                     getSupportActionBar().setDisplayHomeAsUpEnabled(true);
                     getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    homeButtonEnabled = true;
                 }
             } else {
                 homeButtonEnabled = false;
