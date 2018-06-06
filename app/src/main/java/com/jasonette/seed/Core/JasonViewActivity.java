@@ -2170,6 +2170,18 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                 }
             }
 
+            if (header.has("home_button_enabled")) {
+                if (header.getString("home_button_enabled").equalsIgnoreCase("true")) {
+                    if (null != getSupportActionBar()) {
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                        getSupportActionBar().setDisplayShowHomeEnabled(true);
+                    }
+                }
+            } else {
+                getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                getSupportActionBar().setDisplayShowHomeEnabled(false);
+            }
+
             if (header.has("class")) {
                 JSONObject style = JasonHelper.style(header, this);
                 if (style.has("background")) {
@@ -2208,6 +2220,12 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             Log.d("Warning", e.getStackTrace()[0].getMethodName() + " : " + e.toString());
         }
 
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
 
