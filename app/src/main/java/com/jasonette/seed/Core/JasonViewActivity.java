@@ -2652,27 +2652,24 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
             bottomNavigation.setBehaviorTranslationEnabled(true);
 
             bottomNavigation.setDefaultBackgroundColor(Color.parseColor("#FEFEFE"));
-            JSONObject style;
+            JSONObject style = JasonHelper.style(tabs, this);
 
-            if (tabs.has("style")) {
-                style = tabs.getJSONObject("style");
-                if (style.has("color")) {
-                    int color = JasonHelper.parse_color(style.getString("color"));
-                    bottomNavigation.setAccentColor(color);
-                }
-                if (style.has("color:disabled")) {
-                    int disabled_color = JasonHelper.parse_color(style.getString("color:disabled"));
-                    bottomNavigation.setInactiveColor(disabled_color);
-                }
-                if (style.has("background")) {
-                    int background = JasonHelper.parse_color(style.getString("background"));
-                    bottomNavigation.setDefaultBackgroundColor(background);
-                    bottomNavigation.setBackgroundColor(background);
-                }
-                if (style.has("font:android")) {
-                    Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/" + style.getString("font:android") + ".ttf");
-                    bottomNavigation.setTitleTypeface(typeface);
-                }
+            if (style.has("color")) {
+                int color = JasonHelper.parse_color(style.getString("color"));
+                bottomNavigation.setAccentColor(color);
+            }
+            if (style.has("color:disabled")) {
+                int disabled_color = JasonHelper.parse_color(style.getString("color:disabled"));
+                bottomNavigation.setInactiveColor(disabled_color);
+            }
+            if (style.has("background")) {
+                int background = JasonHelper.parse_color(style.getString("background"));
+                bottomNavigation.setDefaultBackgroundColor(background);
+                bottomNavigation.setBackgroundColor(background);
+            }
+            if (style.has("font:android")) {
+                Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/" + style.getString("font:android") + ".ttf");
+                bottomNavigation.setTitleTypeface(typeface);
             }
 
 
