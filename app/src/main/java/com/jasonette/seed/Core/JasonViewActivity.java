@@ -12,6 +12,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -2667,6 +2668,10 @@ public class JasonViewActivity extends AppCompatActivity implements ActivityComp
                     int background = JasonHelper.parse_color(style.getString("background"));
                     bottomNavigation.setDefaultBackgroundColor(background);
                     bottomNavigation.setBackgroundColor(background);
+                }
+                if (style.has("font:android")) {
+                    Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/" + style.getString("font:android") + ".ttf");
+                    bottomNavigation.setTitleTypeface(typeface);
                 }
             }
 
