@@ -7,16 +7,17 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.bumptech.glide.request.RequestOptions;
 import com.glide.slider.library.Animations.DescriptionAnimation;
 import com.glide.slider.library.SliderLayout;
 import com.glide.slider.library.SliderTypes.BaseSliderView;
 import com.glide.slider.library.SliderTypes.DefaultSliderView;
+import com.jasonette.seed.Core.JasonViewActivity;
 import com.jasonette.seed.dao.AdvertisementDao;
 import com.jasonette.seed.utils.AppUtil;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -65,8 +66,20 @@ public class JasonImageSliderComponent {
                     sliderView.setOnSliderClickListener(new BaseSliderView.OnSliderClickListener() {
                         @Override
                         public void onSliderClick(BaseSliderView baseSliderView) {
-                            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(baseSliderView.getDescription()));
-                            context.startActivity(browserIntent);
+                            if (baseSliderView.getDescription().startsWith("http")) {
+                                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(baseSliderView.getDescription()));
+                                context.startActivity(browserIntent);
+                            } else {
+                                try {
+                                    JSONObject action = new JSONObject();
+                                    JSONObject href = new JSONObject();
+                                    href.put("url", baseSliderView.getDescription());
+                                    action.put("options", href);
+                                    ((JasonViewActivity) context).href(action, new JSONObject(), new JSONObject(), context);
+                                } catch (JSONException e) {
+                                    Log.e("IMAGESLIDER", "Error while opening URL: " + baseSliderView.getDescription(), e);
+                                }
+                            }
                         }
                     });
                 }
